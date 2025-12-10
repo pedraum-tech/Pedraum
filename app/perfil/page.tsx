@@ -166,7 +166,7 @@ export default function PerfilPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
- const goAfterSave = useAfterSaveRedirect("/painel"); 
+  const goAfterSave = useAfterSaveRedirect("/painel");
   // === Limite de categorias (padrão 3, override via Firestore: usuarios/{uid}.categoryLimit)
   const [categoryLimit, setCategoryLimit] = useState<number>(3);
 
@@ -241,21 +241,21 @@ export default function PerfilPage() {
   });
 
   const avatarLista = useMemo(() => (form.avatar ? [form.avatar] : []), [form.avatar]);
-useEffect(() => {
-  const steps = [
-    { selector: "[data-tour='perfil.avatar']", title: "Foto e dados", content: "Atualize sua foto e informações básicas.", placement: "right" },
-    { selector: "[data-tour='perfil.atuacao']", title: "Atuação por categoria", content: "Marque o que você vende e os serviços que presta em cada categoria.", placement: "top" },
-    { selector: "[data-tour='perfil.portfolio']", title: "Portfólio", content: "Envie imagens e um PDF opcional para enriquecer seu perfil.", placement: "top" },
-    { selector: "[data-tour='perfil.salvar']", title: "Salvar", content: "Clique aqui para salvar todas as alterações.", placement: "left" },
-  ];
+  useEffect(() => {
+    const steps = [
+      { selector: "[data-tour='perfil.avatar']", title: "Foto e dados", content: "Atualize sua foto e informações básicas.", placement: "right" },
+      { selector: "[data-tour='perfil.atuacao']", title: "Atuação por categoria", content: "Marque o que você vende e os serviços que presta em cada categoria.", placement: "top" },
+      { selector: "[data-tour='perfil.portfolio']", title: "Portfólio", content: "Envie imagens e um PDF opcional para enriquecer seu perfil.", placement: "top" },
+      { selector: "[data-tour='perfil.salvar']", title: "Salvar", content: "Clique aqui para salvar todas as alterações.", placement: "left" },
+    ];
     console.log("🔍 Disparando evento pedraum:tour-register → perfil", steps.length, "steps");
 
-  window.dispatchEvent(
-    new CustomEvent("pedraum:tour-register", {
-      detail: { group: "perfil", order: 1, steps },
-    }),
-  );
-}, []);
+    window.dispatchEvent(
+      new CustomEvent("pedraum:tour-register", {
+        detail: { group: "perfil", order: 1, steps },
+      }),
+    );
+  }, []);
   /* ================= Auth + realtime ================= */
   useEffect(() => {
     const unsubAuth = auth.onAuthStateChanged((user) => {
@@ -288,8 +288,8 @@ useEffect(() => {
           telefone: data.whatsappE164
             ? maskBRFrom55(data.whatsappE164)
             : data.whatsapp
-            ? maskBRFrom55(data.whatsapp)
-            : data.telefone || "",
+              ? maskBRFrom55(data.whatsapp)
+              : data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",
           cpf_cnpj: data.cpf_cnpj || "",
@@ -452,71 +452,71 @@ useEffect(() => {
     setServicosObs(cat.servicos?.obs || "");
   }
 
-function addOuAtualizaCategoria() {
-  const categoria = selCategoria.trim();
-  if (!categoria) {
-    setMsg("Selecione uma categoria.");
-    return;
-  }
-
-  // ✅ Regra 1: se selecionou categoria, é obrigado a marcar pelo menos um checkbox
-  const algumMarcado = vendaProdutosAtivo || vendaPecasAtivo || servicosAtivo;
-  if (!algumMarcado) {
-    setMsg(
-      "Marque pelo menos uma opção (Vendo produtos, Vendo peças ou Presto serviços) para essa categoria."
-    );
-    return;
-  }
-
-  // ✅ Regra 2: se marcou checkbox, é obrigado a escrever
-  if (vendaProdutosAtivo && !vendaProdutosObs.trim()) {
-    setMsg("Descreva o que você vende em 'Vendo produtos'.");
-    return;
-  }
-  if (vendaPecasAtivo && !vendaPecasObs.trim()) {
-    setMsg("Descreva quais peças você vende.");
-    return;
-  }
-  if (servicosAtivo && !servicosObs.trim()) {
-    setMsg("Descreva quais serviços você presta.");
-    return;
-  }
-
-  const novo: AtuacaoBasicaPorCategoria = {
-    categoria,
-    vendaProdutos: { ativo: vendaProdutosAtivo, obs: vendaProdutosObs.trim() },
-    vendaPecas: { ativo: vendaPecasAtivo, obs: vendaPecasObs.trim() },
-    servicos: { ativo: servicosAtivo, obs: servicosObs.trim() },
-  };
-
-  setForm((f) => {
-    const existe = f.atuacaoBasica.find((a) => a.categoria === categoria);
-    const jaNoLimite = f.atuacaoBasica.length >= categoryLimit;
-
-    if (!existe && jaNoLimite) {
-      setMsg(`Você atingiu o limite de ${categoryLimit} categoria(s).`);
-      return f; // não altera
+  function addOuAtualizaCategoria() {
+    const categoria = selCategoria.trim();
+    if (!categoria) {
+      setMsg("Selecione uma categoria.");
+      return;
     }
 
-    if (!existe) {
-      setMsg("Categoria adicionada.");
+    // ✅ Regra 1: se selecionou categoria, é obrigado a marcar pelo menos um checkbox
+    const algumMarcado = vendaProdutosAtivo || vendaPecasAtivo || servicosAtivo;
+    if (!algumMarcado) {
+      setMsg(
+        "Marque pelo menos uma opção (Vendo produtos, Vendo peças ou Presto serviços) para essa categoria."
+      );
+      return;
+    }
+
+    // ✅ Regra 2: se marcou checkbox, é obrigado a escrever
+    if (vendaProdutosAtivo && !vendaProdutosObs.trim()) {
+      setMsg("Descreva o que você vende em 'Vendo produtos'.");
+      return;
+    }
+    if (vendaPecasAtivo && !vendaPecasObs.trim()) {
+      setMsg("Descreva quais peças você vende.");
+      return;
+    }
+    if (servicosAtivo && !servicosObs.trim()) {
+      setMsg("Descreva quais serviços você presta.");
+      return;
+    }
+
+    const novo: AtuacaoBasicaPorCategoria = {
+      categoria,
+      vendaProdutos: { ativo: vendaProdutosAtivo, obs: vendaProdutosObs.trim() },
+      vendaPecas: { ativo: vendaPecasAtivo, obs: vendaPecasObs.trim() },
+      servicos: { ativo: servicosAtivo, obs: servicosObs.trim() },
+    };
+
+    setForm((f) => {
+      const existe = f.atuacaoBasica.find((a) => a.categoria === categoria);
+      const jaNoLimite = f.atuacaoBasica.length >= categoryLimit;
+
+      if (!existe && jaNoLimite) {
+        setMsg(`Você atingiu o limite de ${categoryLimit} categoria(s).`);
+        return f; // não altera
+      }
+
+      if (!existe) {
+        setMsg("Categoria adicionada.");
+        setTimeout(() => setMsg(""), 2500);
+        resetEditorCategoria();
+        setEditorOpen(false);
+        return { ...f, atuacaoBasica: [...f.atuacaoBasica, novo] };
+      }
+
+      // atualização de existente
+      setMsg("Categoria atualizada.");
       setTimeout(() => setMsg(""), 2500);
       resetEditorCategoria();
       setEditorOpen(false);
-      return { ...f, atuacaoBasica: [...f.atuacaoBasica, novo] };
-    }
-
-    // atualização de existente
-    setMsg("Categoria atualizada.");
-    setTimeout(() => setMsg(""), 2500);
-    resetEditorCategoria();
-    setEditorOpen(false);
-    return {
-      ...f,
-      atuacaoBasica: f.atuacaoBasica.map((a) => (a.categoria === categoria ? novo : a)),
-    };
-  });
-}
+      return {
+        ...f,
+        atuacaoBasica: f.atuacaoBasica.map((a) => (a.categoria === categoria ? novo : a)),
+      };
+    });
+  }
 
 
 
@@ -531,171 +531,171 @@ function addOuAtualizaCategoria() {
     }
   }
 
- async function salvar(e?: React.FormEvent) {
-  e?.preventDefault();
-  if (!userId) return;
+  async function salvar(e?: React.FormEvent) {
+    e?.preventDefault();
+    if (!userId) return;
 
-  setSaving(true);
-  setMsg("");
+    setSaving(true);
+    setMsg("");
 
-  try {
-    // ===========================
-    // 1) Validar EDITOR ATUAL
-    // ===========================
-    const editorCategoria = selCategoria.trim();
-    const editorAlgumMarcado =
-      vendaProdutosAtivo || vendaPecasAtivo || servicosAtivo;
+    try {
+      // ===========================
+      // 1) Validar EDITOR ATUAL
+      // ===========================
+      const editorCategoria = selCategoria.trim();
+      const editorAlgumMarcado =
+        vendaProdutosAtivo || vendaPecasAtivo || servicosAtivo;
 
-    if (editorCategoria) {
-      // ❌ Tem categoria selecionada mas nenhum checkbox marcado
-      if (!editorAlgumMarcado) {
-        setMsg(
-          `Na categoria "${editorCategoria}", selecione pelo menos uma opção (Vendo produtos, Vendo peças ou Presto serviços) ou limpe a categoria antes de salvar.`
-        );
-        setSaving(false);
-        return;
+      if (editorCategoria) {
+        // ❌ Tem categoria selecionada mas nenhum checkbox marcado
+        if (!editorAlgumMarcado) {
+          setMsg(
+            `Na categoria "${editorCategoria}", selecione pelo menos uma opção (Vendo produtos, Vendo peças ou Presto serviços) ou limpe a categoria antes de salvar.`
+          );
+          setSaving(false);
+          return;
+        }
+
+        // ❌ Tem checkbox marcado sem texto
+        if (vendaProdutosAtivo && !vendaProdutosObs.trim()) {
+          setMsg(
+            `Descreva o que você vende em "Vendo produtos" para ${editorCategoria}.`
+          );
+          setSaving(false);
+          return;
+        }
+        if (vendaPecasAtivo && !vendaPecasObs.trim()) {
+          setMsg(
+            `Descreva quais peças você vende para ${editorCategoria}.`
+          );
+          setSaving(false);
+          return;
+        }
+        if (servicosAtivo && !servicosObs.trim()) {
+          setMsg(
+            `Descreva quais serviços você presta para ${editorCategoria}.`
+          );
+          setSaving(false);
+          return;
+        }
       }
 
-      // ❌ Tem checkbox marcado sem texto
-      if (vendaProdutosAtivo && !vendaProdutosObs.trim()) {
-        setMsg(
-          `Descreva o que você vende em "Vendo produtos" para ${editorCategoria}.`
-        );
-        setSaving(false);
-        return;
-      }
-      if (vendaPecasAtivo && !vendaPecasObs.trim()) {
-        setMsg(
-          `Descreva quais peças você vende para ${editorCategoria}.`
-        );
-        setSaving(false);
-        return;
-      }
-      if (servicosAtivo && !servicosObs.trim()) {
-        setMsg(
-          `Descreva quais serviços você presta para ${editorCategoria}.`
-        );
-        setSaving(false);
-        return;
-      }
-    }
+      // ===========================
+      // 2) Montar lista FINAL de categorias (incluindo o editor atual)
+      // ===========================
+      let atuacaoBasicaFinal: AtuacaoBasicaPorCategoria[] = [...form.atuacaoBasica];
 
-    // ===========================
-    // 2) Montar lista FINAL de categorias (incluindo o editor atual)
-    // ===========================
-    let atuacaoBasicaFinal: AtuacaoBasicaPorCategoria[] = [...form.atuacaoBasica];
+      if (editorCategoria) {
+        const novo: AtuacaoBasicaPorCategoria = {
+          categoria: editorCategoria,
+          vendaProdutos: { ativo: vendaProdutosAtivo, obs: vendaProdutosObs.trim() },
+          vendaPecas: { ativo: vendaPecasAtivo, obs: vendaPecasObs.trim() },
+          servicos: { ativo: servicosAtivo, obs: servicosObs.trim() },
+        };
 
-    if (editorCategoria) {
-      const novo: AtuacaoBasicaPorCategoria = {
-        categoria: editorCategoria,
-        vendaProdutos: { ativo: vendaProdutosAtivo, obs: vendaProdutosObs.trim() },
-        vendaPecas: { ativo: vendaPecasAtivo, obs: vendaPecasObs.trim() },
-        servicos: { ativo: servicosAtivo, obs: servicosObs.trim() },
-      };
+        const idxExistente = atuacaoBasicaFinal.findIndex(
+          (a) => a.categoria === editorCategoria,
+        );
+        const jaNoLimite = atuacaoBasicaFinal.length >= categoryLimit;
 
-      const idxExistente = atuacaoBasicaFinal.findIndex(
-        (a) => a.categoria === editorCategoria,
+        // Novo + já no limite => bloqueia
+        if (idxExistente === -1 && jaNoLimite) {
+          setMsg(
+            `Você atingiu o limite de ${categoryLimit} categoria(s). Remova alguma ou fale com o suporte/adm.`
+          );
+          setSaving(false);
+          return;
+        }
+
+        if (idxExistente === -1) {
+          atuacaoBasicaFinal.push(novo);
+        } else {
+          atuacaoBasicaFinal[idxExistente] = novo;
+        }
+      }
+
+      // ===========================
+      // 3) Validar CATEGORIAS SALVAS (lista final)
+      // ===========================
+      for (const a of atuacaoBasicaFinal) {
+        const produtosAtivo = !!a.vendaProdutos?.ativo;
+        const pecasAtivo = !!a.vendaPecas?.ativo;
+        const servicosAtivo = !!a.servicos?.ativo;
+
+        const algumMarcado = produtosAtivo || pecasAtivo || servicosAtivo;
+
+        // ❌ Não permite categoria salva sem nenhuma atuação marcada
+        if (!algumMarcado) {
+          setMsg(
+            `Na categoria "${a.categoria}", marque pelo menos uma opção (produtos, peças ou serviços) ou remova essa categoria.`
+          );
+          setSaving(false);
+          return;
+        }
+
+        // ❌ Se marcado, tem que ter texto
+        if (produtosAtivo && !a.vendaProdutos.obs?.trim()) {
+          setMsg(
+            `Descreva o que vende em "Vendo produtos" para ${a.categoria}.`
+          );
+          setSaving(false);
+          return;
+        }
+        if (pecasAtivo && !a.vendaPecas.obs?.trim()) {
+          setMsg(`Descreva "Quais peças" para ${a.categoria}.`);
+          setSaving(false);
+          return;
+        }
+        if (servicosAtivo && !a.servicos.obs?.trim()) {
+          setMsg(`Descreva "Que serviços" para ${a.categoria}.`);
+          setSaving(false);
+          return;
+        }
+      }
+
+      // ===========================
+      // 4) Campos derivados com base na lista FINAL
+      // ===========================
+      const categoriasDistintas = Array.from(
+        new Set(atuacaoBasicaFinal.map((a) => a.categoria).filter(Boolean)),
       );
-      const jaNoLimite = atuacaoBasicaFinal.length >= categoryLimit;
 
-      // Novo + já no limite => bloqueia
-      if (idxExistente === -1 && jaNoLimite) {
-        setMsg(
-          `Você atingiu o limite de ${categoryLimit} categoria(s). Remova alguma ou fale com o suporte/adm.`
-        );
-        setSaving(false);
-        return;
-      }
+      const categoriesAll = categoriasDistintas;
+      const ufsSearch = buildUfsSearch(form.atendeBrasil, form.ufsAtendidas);
 
-      if (idxExistente === -1) {
-        atuacaoBasicaFinal.push(novo);
-      } else {
-        atuacaoBasicaFinal[idxExistente] = novo;
-      }
-    }
+      const wDigits55 = form.telefone ? toDigits55FromFree(form.telefone) : "";
+      const wE164 = wDigits55 ? `+${wDigits55}` : "";
 
-    // ===========================
-    // 3) Validar CATEGORIAS SALVAS (lista final)
-    // ===========================
-    for (const a of atuacaoBasicaFinal) {
-      const produtosAtivo = !!a.vendaProdutos?.ativo;
-      const pecasAtivo = !!a.vendaPecas?.ativo;
-      const servicosAtivo = !!a.servicos?.ativo;
+      // ===========================
+      // 5) Salvar no Firestore
+      // ===========================
+      await updateDoc(doc(db, "usuarios", userId), {
+        nome: form.nome,
+        telefone: form.telefone || "",
+        whatsapp: wDigits55 || "",
+        whatsappE164: wE164 || "",
+        cidade: form.estado === "BRASIL" ? "" : form.cidade || "",
+        estado: form.estado || "",
+        cpf_cnpj: form.cpf_cnpj || "",
+        bio: form.bio || "",
+        avatar: form.avatar || "",
 
-      const algumMarcado = produtosAtivo || pecasAtivo || servicosAtivo;
+        prestaServicos: form.prestaServicos,
+        vendeProdutos: form.vendeProdutos,
 
-      // ❌ Não permite categoria salva sem nenhuma atuação marcada
-      if (!algumMarcado) {
-        setMsg(
-          `Na categoria "${a.categoria}", marque pelo menos uma opção (produtos, peças ou serviços) ou remova essa categoria.`
-        );
-        setSaving(false);
-        return;
-      }
+        // ✅ Usa a lista FINAL aqui
+        atuacaoBasica: atuacaoBasicaFinal,
 
-      // ❌ Se marcado, tem que ter texto
-      if (produtosAtivo && !a.vendaProdutos.obs?.trim()) {
-        setMsg(
-          `Descreva o que vende em "Vendo produtos" para ${a.categoria}.`
-        );
-        setSaving(false);
-        return;
-      }
-      if (pecasAtivo && !a.vendaPecas.obs?.trim()) {
-        setMsg(`Descreva "Quais peças" para ${a.categoria}.`);
-        setSaving(false);
-        return;
-      }
-      if (servicosAtivo && !a.servicos.obs?.trim()) {
-        setMsg(`Descreva "Que serviços" para ${a.categoria}.`);
-        setSaving(false);
-        return;
-      }
-    }
+        categoriasAtuacao: categoriasDistintas,
+        categorias: categoriasDistintas,
 
-    // ===========================
-    // 4) Campos derivados com base na lista FINAL
-    // ===========================
-    const categoriasDistintas = Array.from(
-      new Set(atuacaoBasicaFinal.map((a) => a.categoria).filter(Boolean)),
-    );
+        categoriesAll,
+        ufsSearch,
 
-    const categoriesAll = categoriasDistintas;
-    const ufsSearch = buildUfsSearch(form.atendeBrasil, form.ufsAtendidas);
-
-    const wDigits55 = form.telefone ? toDigits55FromFree(form.telefone) : "";
-    const wE164 = wDigits55 ? `+${wDigits55}` : "";
-
-    // ===========================
-    // 5) Salvar no Firestore
-    // ===========================
-    await updateDoc(doc(db, "usuarios", userId), {
-      nome: form.nome,
-      telefone: form.telefone || "",
-      whatsapp: wDigits55 || "",
-      whatsappE164: wE164 || "",
-      cidade: form.estado === "BRASIL" ? "" : form.cidade || "",
-      estado: form.estado || "",
-      cpf_cnpj: form.cpf_cnpj || "",
-      bio: form.bio || "",
-      avatar: form.avatar || "",
-
-      prestaServicos: form.prestaServicos,
-      vendeProdutos: form.vendeProdutos,
-
-      // ✅ Usa a lista FINAL aqui
-      atuacaoBasica: atuacaoBasicaFinal,
-
-      categoriasAtuacao: categoriasDistintas,
-      categorias: categoriasDistintas,
-
-      categoriesAll,
-      ufsSearch,
-
-      atendeBrasil: form.atendeBrasil,
-      ufsAtendidas: form.atendeBrasil
-        ? ["BRASIL"]
-        : Array.from(
+        atendeBrasil: form.atendeBrasil,
+        ufsAtendidas: form.atendeBrasil
+          ? ["BRASIL"]
+          : Array.from(
             new Set(
               (form.ufsAtendidas || []).map((u) =>
                 String(u).trim().toUpperCase(),
@@ -703,34 +703,34 @@ function addOuAtualizaCategoria() {
             ),
           ),
 
-      portfolioImagens: form.portfolioImagens,
-      portfolioPdfUrl: pdfUrl || null,
+        portfolioImagens: form.portfolioImagens,
+        portfolioPdfUrl: pdfUrl || null,
 
-      agenda: form.agenda,
-      leadPreferencias: {
-        categorias: form.leadPreferencias.categorias,
-        ufs: form.leadPreferencias.ufs,
-        ticketMin: form.leadPreferencias.ticketMin ?? null,
-        ticketMax: form.leadPreferencias.ticketMax ?? null,
-      },
-      mpConnected: !!form.mpConnected,
-      mpStatus: form.mpStatus || "desconectado",
-      atualizadoEm: serverTimestamp(),
-    });
+        agenda: form.agenda,
+        leadPreferencias: {
+          categorias: form.leadPreferencias.categorias,
+          ufs: form.leadPreferencias.ufs,
+          ticketMin: form.leadPreferencias.ticketMin ?? null,
+          ticketMax: form.leadPreferencias.ticketMax ?? null,
+        },
+        mpConnected: !!form.mpConnected,
+        mpStatus: form.mpStatus || "desconectado",
+        atualizadoEm: serverTimestamp(),
+      });
 
-    // Opcional: sincronizar estado local antes de sair
-    setForm((f) => ({ ...f, atuacaoBasica: atuacaoBasicaFinal }));
+      // Opcional: sincronizar estado local antes de sair
+      setForm((f) => ({ ...f, atuacaoBasica: atuacaoBasicaFinal }));
 
-    setMsg("Perfil atualizado com sucesso!");
-    goAfterSave();
-  } catch (err) {
-    console.error(err);
-    setMsg("Erro ao salvar alterações.");
-  } finally {
-    setSaving(false);
-    setTimeout(() => setMsg(""), 4000);
+      setMsg("Perfil atualizado com sucesso!");
+      goAfterSave();
+    } catch (err) {
+      console.error(err);
+      setMsg("Erro ao salvar alterações.");
+    } finally {
+      setSaving(false);
+      setTimeout(() => setMsg(""), 4000);
+    }
   }
-}
 
 
   function buildUfsSearch(atendeBrasil: boolean, ufsAtendidas: string[] = []) {
@@ -812,16 +812,22 @@ function addOuAtualizaCategoria() {
 
       <form onSubmit={salvar} className="grid gap-16">
         {/* Identidade */}
-       <div className="card" /* ... */>
-  <div className="card-title">Identidade e Contato</div>
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-    <div className="card" data-tour="perfil.avatar">
+        <div className="card" /* ... */>
+          <div className="card-title">Identidade e Contato</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+            <div className="card" data-tour="perfil.avatar">
 
-      <div className="label">Foto do Perfil</div>
+              <div className="label">Foto do Perfil</div>
               <ImageUploader
+                // Props visuais que você já tinha
                 imagens={avatarLista}
-                setImagens={(arr) => setField("avatar", arr[0] || "")}
+                setImagens={(imgs: string[]) => setField("avatar", imgs[0] || "")}
                 max={1}
+
+                // NOVAS PROPS PARA O BANCO
+                collectionName="usuarios"
+                docId={userId}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+                fieldName="avatar"    // <--- O nome exato do campo lá no Firestore
               />
               <div style={{ color: "#64748b", fontSize: 13, marginTop: 6 }}>
                 Use uma imagem quadrada para melhor resultado.
@@ -880,10 +886,10 @@ function addOuAtualizaCategoria() {
                       {!form.estado
                         ? "Selecione o estado"
                         : form.estado === "BRASIL"
-                        ? "—"
-                        : carregandoCidades
-                        ? "Carregando..."
-                        : "Selecione a cidade"}
+                          ? "—"
+                          : carregandoCidades
+                            ? "Carregando..."
+                            : "Selecione a cidade"}
                     </option>
                     {cidades.map((c) => (
                       <option key={c} value={c}>
@@ -915,7 +921,7 @@ function addOuAtualizaCategoria() {
         </div>
 
         {/* Atuação (NOVA LÓGICA + rótulos dinâmicos) */}
-      <div className="card" data-tour="perfil.atuacao"></div>
+        <div className="card" data-tour="perfil.atuacao"></div>
         <div className="card">
           <div className="card-title">Atuação por Categoria </div>
 
@@ -1213,10 +1219,10 @@ function addOuAtualizaCategoria() {
 
         {/* Portfólio — Imagens + PDF */}
         <div
-  className="card perfil-documentos-section"
-  data-tour="perfil.portfolio"
-></div>
-        
+          className="card perfil-documentos-section"
+          data-tour="perfil.portfolio"
+        ></div>
+
         <div className="card" data-tour="perfil.portfolio"></div><div className="card">
           <div className="card-title">Portfólio (Imagens + PDF)</div>
 
@@ -1254,6 +1260,9 @@ function addOuAtualizaCategoria() {
                       imagens={form.portfolioImagens}
                       setImagens={(arr: string[]) => setField("portfolioImagens", arr)}
                       max={12}
+                      collectionName="usuarios"
+                      docId={userId}
+                      fieldName="portfolioImagens"
                     />
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
@@ -1321,11 +1330,11 @@ function addOuAtualizaCategoria() {
           </div>
         )}
 
-       <div className="flex justify-end" data-tour="perfil.salvar">
-  <button type="submit" className="btn-gradient" disabled={saving}>
-    {saving ? "Salvando..." : "Salvar Alterações"}
-  </button>
-</div>
+        <div className="flex justify-end" data-tour="perfil.salvar">
+          <button type="submit" className="btn-gradient" disabled={saving}>
+            {saving ? "Salvando..." : "Salvar Alterações"}
+          </button>
+        </div>
 
       </form>
 

@@ -311,7 +311,7 @@ export default function OportunidadeDetalhePage() {
               status: "viewed",
               updatedAt: serverTimestamp(),
             });
-          } catch {}
+          } catch { }
         }
       } else {
         setAssignment(null);
@@ -334,7 +334,7 @@ export default function OportunidadeDetalhePage() {
       updateDoc(doc(db, "demandas", demanda.id), {
         viewCount: increment(1),
         lastViewedAt: serverTimestamp(),
-      }).catch(() => {});
+      }).catch(() => { });
     }
   }, [demanda?.id]);
 
@@ -349,31 +349,31 @@ export default function OportunidadeDetalhePage() {
     }
   }, [searchParams]);
 
-// após pagamento, tenta liberar (fallback ao webhook)
-useEffect(() => {
-  const s1 = searchParams.get("status");
-  const s2 = searchParams.get("collection_status");
-  if ((s1 === "approved" || s2 === "approved" || s1 === "success") && uid && id) {
-    (async () => {
-      try {
-        await fetch("/api/mercadopago/unlock", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ demandId: String(id), userId: uid }),
-        });
-      } catch (e) {
-        console.warn("unlock pós-checkout falhou (provável porque o webhook já liberou).", e);
-      }
-    })();
-  }
-}, [searchParams, uid, id]);
+  // após pagamento, tenta liberar (fallback ao webhook)
+  useEffect(() => {
+    const s1 = searchParams.get("status");
+    const s2 = searchParams.get("collection_status");
+    if ((s1 === "approved" || s2 === "approved" || s1 === "success") && uid && id) {
+      (async () => {
+        try {
+          await fetch("/api/mercadopago/unlock", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ demandId: String(id), userId: uid }),
+          });
+        } catch (e) {
+          console.warn("unlock pós-checkout falhou (provável porque o webhook já liberou).", e);
+        }
+      })();
+    }
+  }, [searchParams, uid, id]);
 
 
   // Meta
   const adminPriceCents = Number(
     demanda?.priceCents ??
-      demanda?.pricingDefault?.amount ??
-      DEFAULT_PRICE_CENTS,
+    demanda?.pricingDefault?.amount ??
+    DEFAULT_PRICE_CENTS,
   );
   const priceCents = adminPriceCents;
   const title = demanda?.titulo || "Oportunidade";
@@ -580,57 +580,57 @@ useEffect(() => {
   }
 
   async function atender() {
-  if (!uid) return;
-  setPaying(true);
-  setMsg(null);
-  try {
-    // garante/atualiza o assignment com o preço vigente
-    await ensureAssignmentDoc();
+    if (!uid) return;
+    setPaying(true);
+    setMsg(null);
+    try {
+      // garante/atualiza o assignment com o preço vigente
+      await ensureAssignmentDoc();
 
-    const adminPriceCents = Number(
-      demanda?.priceCents ??
-      demanda?.pricingDefault?.amount ??
-      DEFAULT_PRICE_CENTS
-    );
+      const adminPriceCents = Number(
+        demanda?.priceCents ??
+        demanda?.pricingDefault?.amount ??
+        DEFAULT_PRICE_CENTS
+      );
 
-    const title = demanda?.titulo || "Oportunidade";
-    const assignmentId = `${id}_${uid}`;
+      const title = demanda?.titulo || "Oportunidade";
+      const assignmentId = `${id}_${uid}`;
 
-    const resp = await fetch("/api/mercadopago/create-preference", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        kind: "lead",
-        refId: String(id),
-        title: `Desbloqueio de contato — ${title}`,
-        unitPriceCents: adminPriceCents > 0 ? Math.round(adminPriceCents) : DEFAULT_PRICE_CENTS,
-        quantity: 1,
-        userId: uid,
-        metadata: {
-          assignmentId,
-          supplierId: uid,
-        },
-      }),
-    });
+      const resp = await fetch("/api/mercadopago/create-preference", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          kind: "lead",
+          refId: String(id),
+          title: `Desbloqueio de contato — ${title}`,
+          unitPriceCents: adminPriceCents > 0 ? Math.round(adminPriceCents) : DEFAULT_PRICE_CENTS,
+          quantity: 1,
+          userId: uid,
+          metadata: {
+            assignmentId,
+            supplierId: uid,
+          },
+        }),
+      });
 
-    if (!resp.ok) {
-      const j = await resp.json().catch(() => ({}));
-      throw new Error(j?.error || "Falha ao iniciar o pagamento.");
+      if (!resp.ok) {
+        const j = await resp.json().catch(() => ({}));
+        throw new Error(j?.error || "Falha ao iniciar o pagamento.");
+      }
+
+      const data = await resp.json();
+      const url = data.init_point || data.sandbox_init_point;
+      if (!url) throw new Error("Não foi possível obter a URL de pagamento.");
+
+      // redireciona para o Checkout Pro
+      window.location.href = url;
+    } catch (e: any) {
+      console.error(e);
+      setMsg(e?.message || "Erro ao iniciar pagamento.");
+    } finally {
+      setPaying(false);
     }
-
-    const data = await resp.json();
-    const url = data.init_point || data.sandbox_init_point;
-    if (!url) throw new Error("Não foi possível obter a URL de pagamento.");
-
-    // redireciona para o Checkout Pro
-    window.location.href = url;
-  } catch (e: any) {
-    console.error(e);
-    setMsg(e?.message || "Erro ao iniciar pagamento.");
-  } finally {
-    setPaying(false);
   }
-}
 
 
   function copy(text?: string) {
@@ -651,7 +651,7 @@ useEffect(() => {
         setMsg("Link copiado!");
         setTimeout(() => setMsg(null), 1500);
       }
-    } catch {}
+    } catch { }
   }
 
   // ====== PDF (igual à de demandas) ======
@@ -809,8 +809,8 @@ useEffect(() => {
                         setLightboxOpen(true);
                       }}
                       onError={(e) =>
-                        ((e.currentTarget as HTMLImageElement).src =
-                          "/images/no-image.png")
+                      ((e.currentTarget as HTMLImageElement).src =
+                        "/images/no-image.png")
                       }
                     />
                   ))}
@@ -1050,8 +1050,8 @@ useEffect(() => {
               className="lb-img"
               onClick={(e) => e.stopPropagation()}
               onError={(e) =>
-                ((e.currentTarget as HTMLImageElement).src =
-                  "/images/no-image.png")
+              ((e.currentTarget as HTMLImageElement).src =
+                "/images/no-image.png")
               }
             />
 

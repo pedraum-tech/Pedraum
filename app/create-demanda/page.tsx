@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 import { db, auth } from "@/firebaseConfig";
 import {
   collection,
-  addDoc,
   serverTimestamp,
   doc,
   getDoc,
+  setDoc,
 } from "firebase/firestore";
 import ImageUploader from "@/components/ImageUploader";
 import nextDynamic from "next/dynamic";
@@ -88,6 +88,11 @@ function sanitizeWhatsapp(s: string) {
 function CreateDemandaContent() {
   const router = useRouter();
   const goAfterSave = useAfterSaveRedirect("/demandas");
+
+  // Gere um ID único para a nova demanda ANTES de submeter o formulário.
+  // Isso permite que o ImageUploader e o PDFUploader associem os anexos
+  // a este documento específico desde o início.
+  const demandaId = useMemo(() => doc(collection(db, "demandas")).id, []);
 
   const [imagens, setImagens] = useState<string[]>([]);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -196,7 +201,7 @@ function CreateDemandaContent() {
     const resumo =
       form.descricao?.trim().length > 0
         ? form.descricao.trim().slice(0, 140) +
-          (form.descricao.trim().length > 140 ? "…" : "")
+        (form.descricao.trim().length > 140 ? "…" : "")
         : "—";
     return {
       descricaoResumo: resumo,
@@ -284,7 +289,7 @@ function CreateDemandaContent() {
           updatedAt: serverTimestamp(),
         } as const;
 
-        await addDoc(collection(db, "demandas"), payload);
+        await setDoc(doc(db, "demandas", demandaId), payload);
 
         try {
           localStorage.removeItem(RASCUNHO_KEY);
@@ -303,7 +308,7 @@ function CreateDemandaContent() {
         setSubmitting(false);
       }
     },
-    [form, imagens, pdfUrl, submitting, goAfterSave],
+    [form, imagens, pdfUrl, submitting, goAfterSave, demandaId],
   );
 
   /* ---------- UI ---------- */
@@ -522,6 +527,11 @@ function CreateDemandaContent() {
                         "Arraste as fotos aqui ou clique em “Selecionar imagens”.",
                       button: "Selecionar imagens",
                     }}
+
+                    // NOVAS PROPS PARA O BANCO
+                    collectionName="demandas" // O nome da coleção no Firestore
+                    docId={demandaId}      // <--- O ID do documento que estamos criando
+                    fieldName="imagens"    // <--- O nome exato do campo lá no Firestore
                   />
                   <p className="text-xs text-slate-500 mt-2" aria-live="polite">
                     Máximo de {IMAGES_MAX} imagens (8MB cada). Atual: {imagens.length}

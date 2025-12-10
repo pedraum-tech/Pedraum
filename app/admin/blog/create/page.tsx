@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
-import { db } from "@/firebaseConfig";
+import { useState, useEffect } from "react";
+import { db, auth } from "@/firebaseConfig";
+import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import ImageUploader from "@/components/ImageUploader";
@@ -11,6 +12,7 @@ export default function BlogCreatePage() {
   const [resumo, setResumo] = useState("");
   const [conteudo, setConteudo] = useState("");
   const [imagens, setImagens] = useState<string[]>([]); // agora recebe array!
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -34,6 +36,15 @@ export default function BlogCreatePage() {
     setLoading(false);
     router.push("/admin/blog");
   }
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    // Limpa o listener quando o componente é desmontado para evitar vazamento de memória
+    return () => unsubscribe();
+  }, []);
 
   return (
     <main
@@ -85,7 +96,12 @@ export default function BlogCreatePage() {
           />
           <label style={labelStyle}>Imagens *</label>
           <div style={{ margin: "8px 0 18px 0" }}>
-            <ImageUploader imagens={imagens} setImagens={setImagens} />
+            <ImageUploader imagens={imagens} setImagens={setImagens}
+              // NOVAS PROPS PARA O BANCO
+              collectionName="blog"
+              docId={auth.currentUser?.uid}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+              fieldName="imagens"    // <--- O nome exato do campo lá no Firestore
+            />
           </div>
           <label style={labelStyle}>Conteúdo *</label>
           <textarea

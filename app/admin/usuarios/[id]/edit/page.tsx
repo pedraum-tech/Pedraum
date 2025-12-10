@@ -45,7 +45,7 @@ const DrivePDFViewer = dynamic(() => import("@/components/DrivePDFViewer"), { ss
 
 /* ========= Constantes ========= */
 const estados = [
-  "BRASIL","AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+  "BRASIL", "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ];
 
 const diasSemana = [
@@ -251,7 +251,7 @@ function phServicos(cat: string) {
 
 // ===== Inteligência de texto =====
 const stopwordsPT = new Set([
-  "de","da","do","das","dos","em","para","por","com","e","ou","a","o","as","os","um","uma","no","na","nos","nas","ao","à","às","aos","que","é","ser",
+  "de", "da", "do", "das", "dos", "em", "para", "por", "com", "e", "ou", "a", "o", "as", "os", "um", "uma", "no", "na", "nos", "nas", "ao", "à", "às", "aos", "que", "é", "ser",
 ]);
 
 function titleCase(s: string) {
@@ -316,7 +316,7 @@ function scoreCategoria(
   let score = 0;
   const faltas: string[] = [];
 
-  const blocks: Array<[boolean,string]> = [
+  const blocks: Array<[boolean, string]> = [
     [vendaProdutosAtivo, vendaProdutosObs],
     [vendaPecasAtivo, vendaPecasObs],
     [servicosAtivo, servicosObs],
@@ -469,8 +469,8 @@ export default function AdminEditarUsuarioPage() {
         const pdfs: string[] = Array.isArray(data.portfolioPDFs)
           ? data.portfolioPDFs
           : data.portfolioPdfUrl
-          ? [data.portfolioPdfUrl]
-          : [];
+            ? [data.portfolioPdfUrl]
+            : [];
 
         const leadConfig = (data.leadConfig as PerfilForm["leadConfig"]) || {
           mode: "free",
@@ -487,8 +487,8 @@ export default function AdminEditarUsuarioPage() {
           telefone: (data as any).whatsappE164
             ? maskBRFrom55((data as any).whatsappE164)
             : (data as any).whatsapp
-            ? maskBRFrom55((data as any).whatsapp)
-            : data.telefone || "",
+              ? maskBRFrom55((data as any).whatsapp)
+              : data.telefone || "",
           cidade: data.cidade || "",
           estado: data.estado || "",
           cpf_cnpj: (data as any).cpf_cnpj || (data as any).cpfCnpj || "",
@@ -666,8 +666,8 @@ export default function AdminEditarUsuarioPage() {
     return gerarInteligenciaCategoria(
       selCategoria,
       vendaProdutosAtivo, vendaProdutosObs,
-      vendaPecasAtivo,  vendaPecasObs,
-      servicosAtivo,    servicosObs,
+      vendaPecasAtivo, vendaPecasObs,
+      servicosAtivo, servicosObs,
       {
         cidade: form?.cidade,
         estado: form?.estado,
@@ -829,19 +829,19 @@ export default function AdminEditarUsuarioPage() {
       const wDigits55 = form.telefone ? toDigits55FromFree(form.telefone) : "";
       const wE164 = wDigits55 ? `+${wDigits55}` : "";
 
- const bc = new BroadcastChannel("admin-users");
-bc.postMessage({
-  type: "user-updated",
-  id: form.id, // usamos o id do próprio formulário
-  patch: {
-    isPatrocinador: form.isPatrocinador,
-    patrocinadorDesde: form.patrocinadorDesde,
-    patrocinadorAte: form.patrocinadorAte,
-    role: form.isPatrocinador ? "patrocinador" : "usuario",
-    tipo: form.isPatrocinador ? "patrocinador" : "usuario",
-  },
-});
-bc.close();
+      const bc = new BroadcastChannel("admin-users");
+      bc.postMessage({
+        type: "user-updated",
+        id: form.id, // usamos o id do próprio formulário
+        patch: {
+          isPatrocinador: form.isPatrocinador,
+          patrocinadorDesde: form.patrocinadorDesde,
+          patrocinadorAte: form.patrocinadorAte,
+          role: form.isPatrocinador ? "patrocinador" : "usuario",
+          tipo: form.isPatrocinador ? "patrocinador" : "usuario",
+        },
+      });
+      bc.close();
 
 
       await updateDoc(doc(db, "usuarios", form.id), {
@@ -1089,7 +1089,19 @@ bc.close();
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
             <div>
               <div className="label">Foto do Perfil</div>
-              <ImageUploader imagens={avatarLista} setImagens={(imgs: string[]) => setField("avatar", imgs[0] || "")} max={1} />
+
+              <ImageUploader
+                // Props visuais que você já tinha
+                imagens={avatarLista}
+                setImagens={(imgs: string[]) => setField("avatar", imgs[0] || "")}
+                max={1}
+
+                // NOVAS PROPS PARA O BANCO
+                collectionName="usuarios"
+                docId={form.id}    // <--- ID do usuário sendo editado
+                fieldName="avatar"    // <--- O nome exato do campo lá no Firestore
+              />
+
               <div style={{ color: "#64748b", fontSize: 13, marginTop: 6 }}>Use imagem quadrada para melhor resultado.</div>
             </div>
 
@@ -1310,7 +1322,7 @@ bc.close();
                             type="button"
                             className="btn-sec"
                             onClick={addOuAtualizaCategoriaBasica}
-                            disabled={!selCategoria || ( atingiuLimite && !selecionadaJaExiste )}
+                            disabled={!selCategoria || (atingiuLimite && !selecionadaJaExiste)}
                             title={
                               atingiuLimite && !selecionadaJaExiste
                                 ? `Limite de ${Number(form.categoryLimit ?? 3)} atingido`
@@ -1463,7 +1475,14 @@ bc.close();
             {/* Imagens */}
             <div>
               <div className="label">Imagens (até 12)</div>
-              <ImageUploader imagens={form.portfolioImagens} setImagens={(arr: string[]) => setField("portfolioImagens", arr)} max={12} />
+              <ImageUploader
+                imagens={form.portfolioImagens}
+                setImagens={(arr: string[]) => setField("portfolioImagens", arr)}
+                max={12}
+                collectionName="usuarios"
+                docId={form.id}
+                fieldName="portfolioImagens"
+              />
 
               {form.portfolioImagens?.length ? (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 10, marginTop: 12 }}>
@@ -1597,9 +1616,8 @@ bc.close();
             <div className="admin-panel__title">
               Controles do Admin
               <span
-                className={`badge ${
-                  form.status === "ativo" ? "badge-success" : form.status === "suspenso" ? "badge-warn" : "badge-danger"
-                }`}
+                className={`badge ${form.status === "ativo" ? "badge-success" : form.status === "suspenso" ? "badge-warn" : "badge-danger"
+                  }`}
                 title="Status da conta"
               >
                 {form.status === "ativo" ? "ATIVO" : form.status === "suspenso" ? "SUSPENSO" : "BANIDO"}
@@ -1722,12 +1740,12 @@ bc.close();
                 </div>
               )}
 
-             
+
             </div>
-<div className="divider" />
+            <div className="divider" />
             {/* Coluna 2 — Leads/Demandas + Financeiro + Patrocínio */}
             <div className="panel-section">
-             
+
               {/* NOVO BLOCO: Leads / Demandas */}
               <div className="section-title">Leads / Demandas do Fornecedor</div>
 
@@ -1817,8 +1835,8 @@ bc.close();
                       {form.patrocinadorDesde?.toDate
                         ? form.patrocinadorDesde.toDate().toLocaleDateString("pt-BR")
                         : form.patrocinadorDesde
-                        ? String(form.patrocinadorDesde)
-                        : "—"}
+                          ? String(form.patrocinadorDesde)
+                          : "—"}
                     </b>
                   </div>
                   {form.patrocinadorAte ? (
@@ -1909,9 +1927,8 @@ bc.close();
                 msg.toLowerCase().includes("sucesso") || msg.toLowerCase().includes("salv") ? "#f7fafc" : "#fff7f7",
               color:
                 msg.toLowerCase().includes("sucesso") || msg.toLowerCase().includes("salv") ? "#16a34a" : "#b91c1c",
-              border: `1.5px solid ${
-                msg.toLowerCase().includes("sucesso") || msg.toLowerCase().includes("salv") ? "#c3f3d5" : "#ffdada"
-              }`,
+              border: `1.5px solid ${msg.toLowerCase().includes("sucesso") || msg.toLowerCase().includes("salv") ? "#c3f3d5" : "#ffdada"
+                }`,
               padding: "12px",
               borderRadius: 12,
               textAlign: "center",

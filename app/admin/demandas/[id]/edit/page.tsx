@@ -23,7 +23,7 @@ import {
   arrayUnion,
   increment,
   setDoc,
-    getCountFromServer,
+  getCountFromServer,
 } from "firebase/firestore";
 import {
   Loader as LoaderIcon,
@@ -164,15 +164,15 @@ type Demanda = {
 /* ================== Constantes e Helpers ================== */
 
 const UFS = [
-  "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
+  "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
 ] as const;
 const UF_MAP: Record<string, string> = {
-  "acre":"AC","alagoas":"AL","amapa":"AP","amazonas":"AM","bahia":"BA","ceara":"CE",
-  "distrito federal":"DF","espirito santo":"ES","goias":"GO","maranhao":"MA","mato grosso":"MT",
-  "mato grosso do sul":"MS","minas gerais":"MG","para":"PA","paraiba":"PB","parana":"PR",
-  "pernambuco":"PE","piaui":"PI","rio de janeiro":"RJ","rio grande do norte":"RN","rio grande do sul":"RS",
-  "rondonia":"RO","roraima":"RR","santa catarina":"SC","sao paulo":"SP","sergipe":"SE","tocantins":"TO",
-  "brasil":"BRASIL","nacional":"BRASIL"
+  "acre": "AC", "alagoas": "AL", "amapa": "AP", "amazonas": "AM", "bahia": "BA", "ceara": "CE",
+  "distrito federal": "DF", "espirito santo": "ES", "goias": "GO", "maranhao": "MA", "mato grosso": "MT",
+  "mato grosso do sul": "MS", "minas gerais": "MG", "para": "PA", "paraiba": "PB", "parana": "PR",
+  "pernambuco": "PE", "piaui": "PI", "rio de janeiro": "RJ", "rio grande do norte": "RN", "rio grande do sul": "RS",
+  "rondonia": "RO", "roraima": "RR", "santa catarina": "SC", "sao paulo": "SP", "sergipe": "SE", "tocantins": "TO",
+  "brasil": "BRASIL", "nacional": "BRASIL"
 };
 const noAcento = (s: string) =>
   (s || "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
@@ -317,23 +317,23 @@ function deriveDemandStatsFromRaw(raw: any) {
   const stats = raw?.demandStats || raw?.statsDemandas || {};
   const sent =
     typeof stats.enviadas === "number" ? stats.enviadas :
-    typeof stats.sent === "number" ? stats.sent :
-    typeof raw?.demandasEnviadas === "number" ? raw.demandasEnviadas :
-    typeof raw?.totalDemandasEnviadas === "number" ? raw.totalDemandasEnviadas :
-    typeof raw?.totalDemandasRecebidas === "number" ? raw.totalDemandasRecebidas :
-    0;
+      typeof stats.sent === "number" ? stats.sent :
+        typeof raw?.demandasEnviadas === "number" ? raw.demandasEnviadas :
+          typeof raw?.totalDemandasEnviadas === "number" ? raw.totalDemandasEnviadas :
+            typeof raw?.totalDemandasRecebidas === "number" ? raw.totalDemandasRecebidas :
+              0;
 
   const unlocked =
     typeof stats.desbloqueadas === "number" ? stats.desbloqueadas :
-    typeof stats.unlocked === "number" ? stats.unlocked :
-    typeof raw?.demandasDesbloqueadas === "number" ? raw.demandasDesbloqueadas :
-    0;
+      typeof stats.unlocked === "number" ? stats.unlocked :
+        typeof raw?.demandasDesbloqueadas === "number" ? raw.demandasDesbloqueadas :
+          0;
 
   const freeCount =
     typeof stats.gratuitas === "number" ? stats.gratuitas :
-    typeof stats.free === "number" ? stats.free :
-    typeof raw?.demandasGratuitas === "number" ? raw.demandasGratuitas :
-    0;
+      typeof stats.free === "number" ? stats.free :
+        typeof raw?.demandasGratuitas === "number" ? raw.demandasGratuitas :
+          0;
 
   return {
     demStatsTotalSent: sent,
@@ -382,7 +382,7 @@ export default function EditDemandaPage() {
     descricao: string;
     categoria: string;
     subcategoria: string;
-     subcategoriaOutrosTexto: string; //
+    subcategoriaOutrosTexto: string; //
     estado: string;
     cidade: string;
     prazo: string;
@@ -397,7 +397,7 @@ export default function EditDemandaPage() {
     descricao: "",
     categoria: "",
     subcategoria: "",
-     subcategoriaOutrosTexto: "", // ⬅ NOVO
+    subcategoriaOutrosTexto: "", // ⬅ NOVO
     estado: "",
     cidade: "",
     prazo: "",
@@ -436,7 +436,7 @@ export default function EditDemandaPage() {
     () => categorias.find((c) => c.nome === form.categoria)?.subcategorias ?? [],
     [categorias, form.categoria]
   );
- useEffect(() => {
+  useEffect(() => {
     let abort = false;
 
     async function fetchCidades(uf: string) {
@@ -496,22 +496,22 @@ export default function EditDemandaPage() {
 
       const isOutros = (d.categoria || "") === "Outros";
 
-setForm({
-  titulo: d.titulo || "",
-  descricao: d.descricao || "",
-  categoria: d.categoria || "",
-  subcategoria: isOutros ? "" : d.subcategoria || "",
-  subcategoriaOutrosTexto: isOutros ? (d.subcategoria || "") : "",
-  estado: d.estado || "",
-  cidade: d.cidade || "",
-  prazo: d.prazo || "",
-  orcamento: d.orcamento != null ? String(d.orcamento) : "",
-  whatsapp: d.whatsapp || "",
-  observacoes: d.observacoes || "",
-  contatoNome: d.contatoNome || d.autorNome || "",
-  contatoEmail: (d.contatoEmail || d.autorEmail || "").toLowerCase(),
-  contatoWhatsappMasked: d55 ? maskFrom55Digits(d55) : "",
-});
+      setForm({
+        titulo: d.titulo || "",
+        descricao: d.descricao || "",
+        categoria: d.categoria || "",
+        subcategoria: isOutros ? "" : d.subcategoria || "",
+        subcategoriaOutrosTexto: isOutros ? (d.subcategoria || "") : "",
+        estado: d.estado || "",
+        cidade: d.cidade || "",
+        prazo: d.prazo || "",
+        orcamento: d.orcamento != null ? String(d.orcamento) : "",
+        whatsapp: d.whatsapp || "",
+        observacoes: d.observacoes || "",
+        contatoNome: d.contatoNome || d.autorNome || "",
+        contatoEmail: (d.contatoEmail || d.autorEmail || "").toLowerCase(),
+        contatoWhatsappMasked: d55 ? maskFrom55Digits(d55) : "",
+      });
 
 
       setTags(d.tags || []);
@@ -524,7 +524,7 @@ setForm({
           ? new Date(d.createdAt.seconds * 1000).toLocaleString("pt-BR")
           : ""
       );
-setLiberacoesCount(d.liberacoesCount ?? 0);
+      setLiberacoesCount(d.liberacoesCount ?? 0);
 
       const cents = d?.pricingDefault?.amount ?? 1990;
       setPrecoPadraoReais((cents / 100).toFixed(2).replace(".", ","));
@@ -690,14 +690,14 @@ setLiberacoesCount(d.liberacoesCount ?? 0);
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) {
     const { name, value } = e.target;
-  if (name === "categoria") {
-    setForm((f) => ({
-      ...f,
-      categoria: value,
-      subcategoria: "",
-      subcategoriaOutrosTexto: "", // ⬅ zera o texto de Outros
-    }));
-    return;
+    if (name === "categoria") {
+      setForm((f) => ({
+        ...f,
+        categoria: value,
+        subcategoria: "",
+        subcategoriaOutrosTexto: "", // ⬅ zera o texto de Outros
+      }));
+      return;
     }
     if (name === "estado") {
       setForm((f) => ({ ...f, estado: value, cidade: "" }));
@@ -780,10 +780,10 @@ setLiberacoesCount(d.liberacoesCount ?? 0);
         setSalvando(false);
         return;
       }
-const subcategoriaFinal =
-  form.categoria === "Outros"
-    ? (form.subcategoriaOutrosTexto || "").trim()
-    : form.subcategoria;
+      const subcategoriaFinal =
+        form.categoria === "Outros"
+          ? (form.subcategoriaOutrosTexto || "").trim()
+          : form.subcategoria;
 
       await updateDoc(doc(db, "demandas", demandaId), {
         titulo: form.titulo,
@@ -878,7 +878,7 @@ const subcategoriaFinal =
         const isFree = isUserFreeDemand(u);
         const amount = isFree ? 0 : centsBase;
         const paymentStatus: PaymentStatus = isFree ? "paid" : "pending";
-const billingType: "free" | "paid" = isFree ? "free" : "paid";
+        const billingType: "free" | "paid" = isFree ? "free" : "paid";
 
         const aRef = doc(db, "demandAssignments", `${demandaId}_${uid}`);
         batch.set(
@@ -925,44 +925,44 @@ const billingType: "free" | "paid" = isFree ? "free" : "paid";
     }
   }
   async function unlockAssignment(supplierId: string) {
-  try {
-    const curUnlocked = assignments.filter((a) => a.status === "unlocked").length;
-    if (unlockCap != null && curUnlocked >= unlockCap) {
-      alert(`Limite de desbloqueios atingido (${unlockCap}).`);
-      return;
+    try {
+      const curUnlocked = assignments.filter((a) => a.status === "unlocked").length;
+      if (unlockCap != null && curUnlocked >= unlockCap) {
+        alert(`Limite de desbloqueios atingido (${unlockCap}).`);
+        return;
+      }
+
+      // descobrir se é free ou pago
+      const existing = assignments.find((x) => x.supplierId === supplierId);
+      let billingType: "free" | "paid" = "paid";
+
+      if (existing?.billingType) {
+        billingType = existing.billingType;
+      } else {
+        const u = usuarios.find((usr) => usr.id === supplierId);
+        billingType = isUserFreeDemand(u || undefined) ? "free" : "paid";
+      }
+
+      await updateDoc(doc(db, "demandAssignments", `${demandaId}_${supplierId}`), {
+        status: "unlocked",
+        unlockedByAdmin: true,
+        unlockedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        paymentStatus: "paid",
+
+        // NOVO
+        billingType,
+      });
+
+      await updateDoc(doc(db, "demandas", demandaId), {
+        liberadoPara: arrayUnion(supplierId),
+        liberacoesCount: increment(1),
+        updatedAt: serverTimestamp(),
+      });
+    } catch {
+      alert("Erro ao liberar contato.");
     }
-
-    // descobrir se é free ou pago
-    const existing = assignments.find((x) => x.supplierId === supplierId);
-    let billingType: "free" | "paid" = "paid";
-
-    if (existing?.billingType) {
-      billingType = existing.billingType;
-    } else {
-      const u = usuarios.find((usr) => usr.id === supplierId);
-      billingType = isUserFreeDemand(u || undefined) ? "free" : "paid";
-    }
-
-    await updateDoc(doc(db, "demandAssignments", `${demandaId}_${supplierId}`), {
-      status: "unlocked",
-      unlockedByAdmin: true,
-      unlockedAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-      paymentStatus: "paid",
-
-      // NOVO
-      billingType,
-    });
-
-    await updateDoc(doc(db, "demandas", demandaId), {
-      liberadoPara: arrayUnion(supplierId),
-       liberacoesCount: increment(1),
-      updatedAt: serverTimestamp(),
-    });
-  } catch {
-    alert("Erro ao liberar contato.");
   }
-}
 
   async function cancelAssignment(supplierId: string) {
     if (!window.confirm("Cancelar o envio? O fornecedor não poderá pagar/desbloquear.")) return;
@@ -975,8 +975,8 @@ const billingType: "free" | "paid" = isFree ? "free" : "paid";
       await updateDoc(doc(db, "demandas", demandaId), {
         liberadoPara: arrayRemove(supplierId),
         updatedAt: serverTimestamp(),
-      }).catch(() => {});
-      await deleteDoc(doc(db, "demandas", demandaId, "acessos", supplierId)).catch(() => {});
+      }).catch(() => { });
+      await deleteDoc(doc(db, "demandas", demandaId, "acessos", supplierId)).catch(() => { });
     } catch {
       alert("Erro ao cancelar envio.");
     }
@@ -998,8 +998,8 @@ const billingType: "free" | "paid" = isFree ? "free" : "paid";
       await updateDoc(doc(db, "demandas", demandaId), {
         liberadoPara: arrayRemove(supplierId),
         updatedAt: serverTimestamp(),
-      }).catch(() => {});
-      await deleteDoc(doc(db, "demandas", demandaId, "acessos", supplierId)).catch(() => {});
+      }).catch(() => { });
+      await deleteDoc(doc(db, "demandas", demandaId, "acessos", supplierId)).catch(() => { });
       await deleteDoc(doc(db, "demandAssignments", `${demandaId}_${supplierId}`));
     } catch {
       alert("Erro ao excluir envio.");
@@ -1042,36 +1042,36 @@ const billingType: "free" | "paid" = isFree ? "free" : "paid";
     }
     try {
       const u = profileCache[uid] || usuarios.find((user) => user.id === uid);
-const isFree = isUserFreeDemand(u);
-const amount = isFree ? 0 : centsBase;
-const paymentStatus: PaymentStatus = isFree ? "paid" : "pending";
+      const isFree = isUserFreeDemand(u);
+      const amount = isFree ? 0 : centsBase;
+      const paymentStatus: PaymentStatus = isFree ? "paid" : "pending";
 
-/** NOVO */
-const billingType: "free" | "paid" = isFree ? "free" : "paid";
+      /** NOVO */
+      const billingType: "free" | "paid" = isFree ? "free" : "paid";
 
-const ref = doc(db, "demandAssignments", `${demandaId}_${uid}`);
-await setDoc(
-  ref,
-  {
-    demandId: demandaId,
-    supplierId: uid,
-    status: "sent" as AssignmentStatus,
-    pricing: {
-      amount,
-      currency: "BRL",
-      exclusive: false,
-      cap: unlockCap ?? null,
-      soldCount: 0,
-    },
-    paymentStatus,
-    billingType, // NOVO
+      const ref = doc(db, "demandAssignments", `${demandaId}_${uid}`);
+      await setDoc(
+        ref,
+        {
+          demandId: demandaId,
+          supplierId: uid,
+          status: "sent" as AssignmentStatus,
+          pricing: {
+            amount,
+            currency: "BRL",
+            exclusive: false,
+            cap: unlockCap ?? null,
+            soldCount: 0,
+          },
+          paymentStatus,
+          billingType, // NOVO
 
-    notes: (profileNote || "").trim(),
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp(),
-  },
-  { merge: true }
-);
+          notes: (profileNote || "").trim(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
 
       alert("Demanda enviada ao usuário.");
       setOpenProfileUserId(null);
@@ -1141,7 +1141,7 @@ await setDoc(
     return () => {
       try {
         el && el.remove();
-      } catch {}
+      } catch { }
     };
   }, []);
 
@@ -1224,12 +1224,12 @@ await setDoc(
               </div>
             )}
           </div>
-<div className="flex items-center gap-2 text-sm text-gray-700">
-  <span className="font-semibold">Liberações:</span>
-  <span className="text-blue-600 font-bold">
-    {liberacoesCount}
-  </span>
-</div>
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <span className="font-semibold">Liberações:</span>
+            <span className="text-blue-600 font-bold">
+              {liberacoesCount}
+            </span>
+          </div>
 
           {/* Status (pill) */}
           <div
@@ -1254,8 +1254,8 @@ await setDoc(
                 ...(demandaStatus === "approved"
                   ? { background: "#ecfdf5", color: "#065f46" }
                   : demandaStatus === "rejected"
-                  ? { background: "#fff1f2", color: "#9f1239" }
-                  : { background: "#f1f5f9", color: "#111827" }),
+                    ? { background: "#fff1f2", color: "#9f1239" }
+                    : { background: "#f1f5f9", color: "#111827" }),
               }}
             >
               Status: {demandaStatus}
@@ -1284,123 +1284,123 @@ await setDoc(
             />
 
             {/* Taxonomia */}
-<div style={twoCols}>
-  <div style={{ flex: 1 }}>
-    <label style={label}>
-      <span
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 6,
-        }}
-      >
-        <Layers size={16} /> Categoria
-      </span>
-    </label>
-    <select
-      name="categoria"
-      value={form.categoria}
-      onChange={handleChange}
-      required
-      style={input}
-      disabled={taxLoading}
-    >
-      <option value="">
-        {taxLoading ? "Carregando..." : "Selecione"}
-      </option>
-      {categorias.map((c) => (
-        <option key={c.slug || c.nome} value={c.nome}>
-          {c.nome}
-        </option>
-      ))}
-    </select>
+            <div style={twoCols}>
+              <div style={{ flex: 1 }}>
+                <label style={label}>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 6,
+                    }}
+                  >
+                    <Layers size={16} /> Categoria
+                  </span>
+                </label>
+                <select
+                  name="categoria"
+                  value={form.categoria}
+                  onChange={handleChange}
+                  required
+                  style={input}
+                  disabled={taxLoading}
+                >
+                  <option value="">
+                    {taxLoading ? "Carregando..." : "Selecione"}
+                  </option>
+                  {categorias.map((c) => (
+                    <option key={c.slug || c.nome} value={c.nome}>
+                      {c.nome}
+                    </option>
+                  ))}
+                </select>
 
-    {form.categoria === "Outros" ? (
-  <textarea
-    name="subcategoriaOutrosTexto"
-    value={form.subcategoriaOutrosTexto}
-    onChange={handleChange}
-    required
-    placeholder="Descreva o que você precisa / o que vende"
-    style={{ ...input, minHeight: 80 }}
-  />
-) : (
-  <select
-    name="subcategoria"
-    value={form.subcategoria}
-    onChange={handleChange}
-    required
-    style={input}
-    disabled={!form.categoria}
-  >
-    <option value="">
-      {form.categoria
-        ? "Selecione a subcategoria"
-        : "Selecione a categoria"}
-    </option>
-    {subsForm.map((s) => (
-      <option key={s.slug || s.nome} value={s.nome}>
-        {s.nome}
-      </option>
-    ))}
-  </select>
-)}
+                {form.categoria === "Outros" ? (
+                  <textarea
+                    name="subcategoriaOutrosTexto"
+                    value={form.subcategoriaOutrosTexto}
+                    onChange={handleChange}
+                    required
+                    placeholder="Descreva o que você precisa / o que vende"
+                    style={{ ...input, minHeight: 80 }}
+                  />
+                ) : (
+                  <select
+                    name="subcategoria"
+                    value={form.subcategoria}
+                    onChange={handleChange}
+                    required
+                    style={input}
+                    disabled={!form.categoria}
+                  >
+                    <option value="">
+                      {form.categoria
+                        ? "Selecione a subcategoria"
+                        : "Selecione a categoria"}
+                    </option>
+                    {subsForm.map((s) => (
+                      <option key={s.slug || s.nome} value={s.nome}>
+                        {s.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
-  </div>
-</div>
+              </div>
+            </div>
 
-{/* Localização */}
-<div style={twoCols}>
-  <div style={{ flex: 1 }}>
-    <label style={label}>Estado (UF)</label>
-    <select
-      name="estado"
-      value={form.estado}
-      onChange={handleChange}
-      required
-      style={input}
-    >
-      <option value="">Selecione o estado</option>
-      {UFS.map((uf) => (
-        <option key={uf} value={uf}>
-          {uf}
-        </option>
-      ))}
-    </select>
-  </div>
+            {/* Localização */}
+            <div style={twoCols}>
+              <div style={{ flex: 1 }}>
+                <label style={label}>Estado (UF)</label>
+                <select
+                  name="estado"
+                  value={form.estado}
+                  onChange={handleChange}
+                  required
+                  style={input}
+                >
+                  <option value="">Selecione o estado</option>
+                  {UFS.map((uf) => (
+                    <option key={uf} value={uf}>
+                      {uf}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-  <div style={{ flex: 1 }}>
-    <label style={label}>Cidade</label>
-    <select
-      name="cidade"
-      value={form.cidade}
-      onChange={handleChange}
-      style={input}
-      disabled={
-        !form.estado ||
-        form.estado === "BRASIL" ||
-        carregandoCidades ||
-        !cidades.length
-      }
-    >
-      <option value="">
-        {!form.estado
-          ? "Selecione o estado"
-          : form.estado === "BRASIL"
-          ? "Brasil inteiro (sem cidade específica)"
-          : carregandoCidades
-          ? "Carregando cidades..."
-          : "Selecione a cidade"}
-      </option>
+              <div style={{ flex: 1 }}>
+                <label style={label}>Cidade</label>
+                <select
+                  name="cidade"
+                  value={form.cidade}
+                  onChange={handleChange}
+                  style={input}
+                  disabled={
+                    !form.estado ||
+                    form.estado === "BRASIL" ||
+                    carregandoCidades ||
+                    !cidades.length
+                  }
+                >
+                  <option value="">
+                    {!form.estado
+                      ? "Selecione o estado"
+                      : form.estado === "BRASIL"
+                        ? "Brasil inteiro (sem cidade específica)"
+                        : carregandoCidades
+                          ? "Carregando cidades..."
+                          : "Selecione a cidade"}
+                  </option>
 
-      {cidades.map((c) => (
-        <option key={c} value={c}>
-          {c}
-        </option>
-      ))}
-    </select>
-  </div>
-</div>
+                  {cidades.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
 
             {/* Anexos */}
             <label style={label}>
@@ -1438,7 +1438,12 @@ await setDoc(
                 </div>
                 <div className="px-4 pb-4">
                   <div className="rounded-lg border border-dashed p-3">
-                    <ImageUploader imagens={imagens} setImagens={setImagens} max={5} />
+                    <ImageUploader imagens={imagens} setImagens={setImagens} max={5}
+                      // NOVAS PROPS PARA O BANCO
+                      collectionName="demandas"
+                      docId={userId}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+                      fieldName="imagens"    // <--- O nome exato do campo lá no Firestore
+                    />
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
                     Adicione até 5 imagens.
@@ -1953,121 +1958,121 @@ await setDoc(
 
             <div style={{ maxHeight: "56vh", overflow: "auto" }}>
               {usuariosVisiveis.map((u) => {
-  const nome = u.nome || u.email || `Usuário ${u.id}`;
-  const contato = u.whatsappE164 || u.whatsapp || u.telefone || "—";
-  const regioes = u.atendeBrasil
-    ? "BRASIL"
-    : u.ufs?.length
-    ? u.ufs.join(", ")
-    : u.estado || "—";
-  const cats = u.categorias?.length ? u.categorias.join(", ") : "—";
-  const already = jaEnviados.has(u.id);
-  const selected = selUsuarios.includes(u.id);
-  const isFree = isUserFreeDemand(u);
-  const total = u.demStatsTotalSent ?? 0;
-  const unlocked = u.demStatsUnlocked ?? 0;
-  const free = u.demStatsFree ?? 0;
-  const paid = Math.max(0, unlocked - free);
+                const nome = u.nome || u.email || `Usuário ${u.id}`;
+                const contato = u.whatsappE164 || u.whatsapp || u.telefone || "—";
+                const regioes = u.atendeBrasil
+                  ? "BRASIL"
+                  : u.ufs?.length
+                    ? u.ufs.join(", ")
+                    : u.estado || "—";
+                const cats = u.categorias?.length ? u.categorias.join(", ") : "—";
+                const already = jaEnviados.has(u.id);
+                const selected = selUsuarios.includes(u.id);
+                const isFree = isUserFreeDemand(u);
+                const total = u.demStatsTotalSent ?? 0;
+                const unlocked = u.demStatsUnlocked ?? 0;
+                const free = u.demStatsFree ?? 0;
+                const paid = Math.max(0, unlocked - free);
 
-  return (
-    <div
-      key={u.id}
-      style={rowItem(already ? "#f1fff6" : selected ? "#f1f5ff" : "#fff")}
-    >
-      <input
-        type="checkbox"
-        checked={selected || already}
-        disabled={already}
-        onChange={(e) => toggleUsuario(u.id, e.target.checked)}
-      />
-      {/* Linha principal: Nome + Badges + Botões */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    width: "100%",
-  }}
->
-  {/* ESQUERDA — NOME + BADGES */}
-  <div style={{ flex: 1 }}>
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        flexWrap: "wrap",
-      }}
-    >
-      <span
-        style={{
-          fontWeight: 900,
-          color: "#0f172a",
-        }}
-      >
-        {nome}
-      </span>
+                return (
+                  <div
+                    key={u.id}
+                    style={rowItem(already ? "#f1fff6" : selected ? "#f1f5ff" : "#fff")}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected || already}
+                      disabled={already}
+                      onChange={(e) => toggleUsuario(u.id, e.target.checked)}
+                    />
+                    {/* Linha principal: Nome + Badges + Botões */}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        width: "100%",
+                      }}
+                    >
+                      {/* ESQUERDA — NOME + BADGES */}
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            flexWrap: "wrap",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontWeight: 900,
+                              color: "#0f172a",
+                            }}
+                          >
+                            {nome}
+                          </span>
 
-      {already && (
-        <span style={chip("#eef2ff", "#3730a3")}>
-          <CheckCircle2 size={12} /> enviado
-        </span>
-      )}
+                          {already && (
+                            <span style={chip("#eef2ff", "#3730a3")}>
+                              <CheckCircle2 size={12} /> enviado
+                            </span>
+                          )}
 
-      {u.patrocinador && (
-        <span style={chip("#fff7ed", "#9a3412")}>Patrocinador</span>
-      )}
+                          {u.patrocinador && (
+                            <span style={chip("#fff7ed", "#9a3412")}>Patrocinador</span>
+                          )}
 
-      {!u.patrocinador && isFree && (
-        <span style={chip("#ecfeff", "#155e75")}>Recebe grátis</span>
-      )}
-    </div>
+                          {!u.patrocinador && isFree && (
+                            <span style={chip("#ecfeff", "#155e75")}>Recebe grátis</span>
+                          )}
+                        </div>
 
-    {/* sublinha: email + contato + cidade */}
-    <div style={subLine}>
-      {u.email || "—"} • {contato} • {u.cidade || "—"}/{regioes}
-    </div>
+                        {/* sublinha: email + contato + cidade */}
+                        <div style={subLine}>
+                          {u.email || "—"} • {contato} • {u.cidade || "—"}/{regioes}
+                        </div>
 
-    {/* categorias */}
-    <div style={subMicro}>Categorias: {cats}</div>
-  </div>
+                        {/* categorias */}
+                        <div style={subMicro}>Categorias: {cats}</div>
+                      </div>
 
-  {/* DIREITA — BOTÕES */}
-  <div style={{ display: "flex", gap: 8 }}>
-    <button
-      type="button"
-      onClick={() => openProfile(u.id)}
-      style={ghostBtn}
-    >
-      Ver perfil
-    </button>
+                      {/* DIREITA — BOTÕES */}
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          type="button"
+                          onClick={() => openProfile(u.id)}
+                          style={ghostBtn}
+                        >
+                          Ver perfil
+                        </button>
 
-    <a
-      href={`/admin/usuarios/${u.id}/edit`}
-      target="_blank"
-      rel="noreferrer"
-      style={ghostBtn}
-      title="Abrir no admin"
-    >
-      <ExternalLink size={14} />
-    </a>
-  
+                        <a
+                          href={`/admin/usuarios/${u.id}/edit`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={ghostBtn}
+                          title="Abrir no admin"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
 
-        </div>
 
-        <span
-          style={{
-            fontSize: 11,
-            color: "#94a3b8",
-          }}
-        >
-          #{u.id}
-        </span>
-      </div>
-    </div>
-  );
-})}
+                      </div>
+
+                      <span
+                        style={{
+                          fontSize: 11,
+                          color: "#94a3b8",
+                        }}
+                      >
+                        #{u.id}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
 
 
               {!loadingUsuarios && usuariosVisiveis.length === 0 && (
@@ -2242,7 +2247,7 @@ function AssignmentRow({
         if (!s.exists()) s = await getDoc(doc(db, "users", a.supplierId));
         if (!s.exists()) s = await getDoc(doc(db, "user", a.supplierId));
         if (s.exists()) setUser({ id: s.id, ...(s.data() as any) });
-      } catch {}
+      } catch { }
     })();
   }, [a.supplierId]);
 
@@ -2255,10 +2260,10 @@ function AssignmentRow({
     a.status === "unlocked"
       ? chip("#ecfdf5", "#065f46")
       : a.status === "canceled"
-      ? chip("#fff1f2", "#9f1239")
-      : a.status === "viewed"
-      ? chip("#eef2ff", "#3730a3")
-      : chip("#f1f5f9", "#111827");
+        ? chip("#fff1f2", "#9f1239")
+        : a.status === "viewed"
+          ? chip("#eef2ff", "#3730a3")
+          : chip("#f1f5f9", "#111827");
 
   const payChip = pago
     ? chip("#ecfdf5", "#065f46")
@@ -2537,8 +2542,8 @@ function ProfileModal({
   const planLabel = u?.patrocinador
     ? "Patrocinador (sempre grátis)"
     : isFree
-    ? "Recebe demandas de graça"
-    : "Plano normal (pago por demanda)";
+      ? "Recebe demandas de graça"
+      : "Plano normal (pago por demanda)";
 
   // ====== AGORA USANDO leadStats E NÃO MAIS CAMPOS ANTIGOS DO USUÁRIO ======
   const totalSent = leadStats.total;
