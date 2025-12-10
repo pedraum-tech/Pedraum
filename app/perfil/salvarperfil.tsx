@@ -668,7 +668,7 @@ export default function PerfilPage() {
         status: "open",
         canal: "whatsapp",
       });
-    } catch {}
+    } catch { }
     const pairsTxt = (form.categoriasAtuacaoPairs || [])
       .map((p) => `${p.categoria} › ${p.subcategoria || "-"}`)
       .join(" | ");
@@ -783,12 +783,12 @@ export default function PerfilPage() {
       const ufsAtendidas = form.atendeBrasil
         ? ["BRASIL"]
         : Array.from(
-            new Set(
-              (form.ufsAtendidas || []).map((u) =>
-                String(u).trim().toUpperCase(),
-              ),
+          new Set(
+            (form.ufsAtendidas || []).map((u) =>
+              String(u).trim().toUpperCase(),
             ),
-          );
+          ),
+        );
 
       const wDigits55 = form.telefone ? toDigits55FromFree(form.telefone) : "";
       const wE164 = wDigits55 ? `+${wDigits55}` : "";
@@ -957,11 +957,17 @@ export default function PerfilPage() {
           <div className="card-title">Identidade e Contato</div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
             <div>
-              <div className="label">Foto do Perfil</div>
+              <div className="label">Foto do Perfil </div>
               <ImageUploader
+                // Props visuais que você já tinha
                 imagens={avatarLista}
-                setImagens={(arr) => setField("avatar", arr[0] || "")}
+                setImagens={(imgs: string[]) => setField("avatar", imgs[0] || "")}
                 max={1}
+
+                // NOVAS PROPS PARA O BANCO
+                collectionName="usuarios"
+                docId={userId}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+                fieldName="avatar"    // <--- O nome exato do campo lá no Firestore
               />
               <div style={{ color: "#64748b", fontSize: 13, marginTop: 6 }}>
                 Use uma imagem quadrada para melhor resultado.
@@ -1101,8 +1107,8 @@ export default function PerfilPage() {
                   categorias={categorias}
                   disabled={taxLoading}
                   onSelectPath={onPickTaxonomy}
-                  // placeholder opcional:
-                  // placeholder="Ex.: britador de mandíbulas, peneira vibratória, CLP, etc."
+                // placeholder opcional:
+                // placeholder="Ex.: britador de mandíbulas, peneira vibratória, CLP, etc."
                 />
               </div>
 
@@ -1578,6 +1584,9 @@ export default function PerfilPage() {
                         setField("portfolioImagens", arr)
                       }
                       max={12}
+                      collectionName="usuarios"
+                      docId={userId}
+                      fieldName="portfolioImagens"
                     />
                   </div>
                   <p className="text-xs text-slate-500 mt-2">
