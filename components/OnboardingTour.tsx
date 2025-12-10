@@ -67,7 +67,7 @@ function getSeenSet(): Set<string> {
 function saveSeenSet(seen: Set<string>) {
   try {
     localStorage.setItem(KEY_SEEN, JSON.stringify(Array.from(seen)));
-  } catch {}
+  } catch { }
 }
 const isGroupDone = (g: string) => {
   try {
@@ -79,7 +79,7 @@ const isGroupDone = (g: string) => {
 const markGroupDone = (g: string) => {
   try {
     localStorage.setItem(KEY_GROUP_DONE(g), "1");
-  } catch {}
+  } catch { }
 };
 
 /* ---------- Placement seguro ---------- */
@@ -375,8 +375,8 @@ function buildHeaderSteps(): Step[] {
   const firstTarget = hasRegister
     ? '[data-tour="header-register"]'
     : hasLogin
-    ? '[data-tour="header-login"]'
-    : '[data-tour="header-logo"]';
+      ? '[data-tour="header-login"]'
+      : '[data-tour="header-logo"]';
 
   const raw: Step[] = [
     {
@@ -384,8 +384,8 @@ function buildHeaderSteps(): Step[] {
       content: hasRegister
         ? "Entre para publicar, responder demandas e falar com compradores."
         : hasLogin
-        ? "Entre no seu perfil para gerenciar suas publicações e contatos."
-        : "Aqui você volta sempre para o início.",
+          ? "Entre no seu perfil para gerenciar suas publicações e contatos."
+          : "Aqui você volta sempre para o início.",
       disableBeacon: true,
       placement: "bottom",
     },
@@ -445,7 +445,7 @@ function OnboardingInner() {
   const inferredGroup = routeGroupFrom(pathname);
   const activeGroup =
     forcedGroupParam &&
-    !["1", "true", "on", "reset"].includes(forcedGroupParam)
+      !["1", "true", "on", "reset"].includes(forcedGroupParam)
       ? forcedGroupParam
       : inferredGroup;
 
@@ -462,7 +462,7 @@ function OnboardingInner() {
           const url = new URL(window.location.href);
           url.searchParams.set("tour", flow || "on");
           window.history.replaceState({}, "", url.toString());
-        } catch {}
+        } catch { }
         startedRef.current = false;
         setRun(false);
         setSteps((s) => s);
@@ -476,7 +476,7 @@ function OnboardingInner() {
               (g) => localStorage.removeItem(KEY_GROUP_DONE(g)),
             );
           }
-        } catch {}
+        } catch { }
       },
     };
     return () => {
@@ -596,7 +596,7 @@ function OnboardingInner() {
         ["home", "vitrine", "demandas", "painel", "perfil", "admin", "header"].forEach(
           (g) => localStorage.removeItem(KEY_GROUP_DONE(g)),
         );
-      } catch {}
+      } catch { }
       return;
     }
 
@@ -684,7 +684,7 @@ function OnboardingInner() {
         if ((steps || []).some((s) => String(s.target).includes("header-"))) {
           markGroupDone("header");
         }
-      } catch {}
+      } catch { }
       setRun(false);
       runningRef.current = false;
       startedRef.current = false;
@@ -759,9 +759,10 @@ function OnboardingInner() {
 
 /* ---------- Export com Suspense ---------- */
 export default function OnboardingTour() {
-  return (
-    <Suspense fallback={null}>
-      <OnboardingInner />
-    </Suspense>
-  );
+  // return (
+  //   <Suspense fallback={null}>
+  //     <OnboardingInner />
+  //   </Suspense>
+  // );
+  return null;
 }

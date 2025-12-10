@@ -38,24 +38,49 @@ export async function POST(req: Request) {
 
     const unit_price = Number((priceCents / 100).toFixed(2));
 
-    // Garante URLs absolutas mesmo sem BASE_URL na Vercel
-    const { protocol, host } = new URL(req.url);
-    const baseUrl = process.env.BASE_URL ?? `${protocol}//${host}`;
+    // ... código anterior ...
+
+    const urlObj = new URL(req.url);
+    const protocol = urlObj.protocol;
+    const host = urlObj.host;
+
+    // 1. Pega do ENV ou Fallback
+    let rawBaseUrl = process.env.BASE_URL || `${protocol}//${host}`;
+
+    // 2. LIMPEZA AGRESSIVA: Remove aspas extras e espaços em branco
+    let baseUrl = rawBaseUrl.replace(/['"]+/g, '').trim();
+
+    // 3. Remove barra final se existir
+    if (baseUrl.endsWith("/")) {
+      baseUrl = baseUrl.slice(0, -1);
+    }
+
+    console.log("SANITIZED baseUrl:", baseUrl); // Verifique se não há aspas aqui
+
+    // Defina o objeto de URLs explicitamente antes de passar para a função
+    const backUrls = {
+      success: `${baseUrl}/checkout/success`,
+      pending: `${baseUrl}/checkout/pending`,
+      failure: `${baseUrl}/checkout/failure`,
+    };
+
+    // LOG DE DEBUG: Veja exatamente o que o SDK vai receber
+    console.log("Back URLs sendo enviadas:", JSON.stringify(backUrls, null, 2));
+
+    const preferenceData = {
+      items: [{ id, title, quantity, currency_id, unit_price }],
+      back_urls: backUrls, // Passa o objeto limpo
+      auto_return: "approved",
+      binary_mode: true,
+      external_reference: [kind, refId].filter(Boolean).join(":"),
+      metadata: { ...metadata, priceCents, kind, refId },
+    };
 
     const pref = await getPreference().create({
-      body: {
-        items: [{ id, title, quantity, currency_id, unit_price }],
-        back_urls: {
-          success: `${baseUrl}/checkout/success`,
-          failure: `${baseUrl}/checkout/failure`,
-          pending: `${baseUrl}/checkout/pending`,
-        },
-        auto_return: "approved",
-        binary_mode: true,
-        external_reference: [kind, refId].filter(Boolean).join(":"), // "lead:abc123", p.ex.
-        metadata: { ...metadata, priceCents, kind, refId },
-      },
+      body: preferenceData,
     });
+
+    // ... resto do código
 
     return NextResponse.json({
       preferenceId: pref.id,

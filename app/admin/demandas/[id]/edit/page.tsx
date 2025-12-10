@@ -1441,7 +1441,8 @@ export default function EditDemandaPage() {
                     <ImageUploader imagens={imagens} setImagens={setImagens} max={5}
                       // NOVAS PROPS PARA O BANCO
                       collectionName="demandas"
-                      docId={userId}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+                      // docId={userId}    // <--- Coloque aqui a variável que guarda o ID do usuário logado
+                      docId={demandaId}    // <--- CORREÇÃO: Use o ID da demanda, não do usuário.
                       fieldName="imagens"    // <--- O nome exato do campo lá no Firestore
                     />
                   </div>

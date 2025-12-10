@@ -121,7 +121,7 @@ export default function RootLayout({
         <Footer />
 
         {/* Onboarding — carregado sempre no final */}
-        <OnboardingTour />
+        {/* <OnboardingTour /> */}
       </body>
     </html>
   );

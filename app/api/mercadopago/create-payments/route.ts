@@ -6,8 +6,7 @@ export async function POST(req: Request) {
   const { leadId, leadTitle, price } = await req.json();
 
   // Credenciais fixas (suas, conforme enviado)
-  const accessToken =
-    "APP_USR-1225380117007706-062313-a9a9bd76d4128ac10d0e97cb79933222-150213449";
+  const accessToken = process.env.MP_ACCESS_TOKEN;
   const siteUrl = "http://localhost:3000"; // Se quiser para produção, troque aqui pelo domínio real
 
   // Validação básica
