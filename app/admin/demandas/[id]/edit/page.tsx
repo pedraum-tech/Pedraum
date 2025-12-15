@@ -260,7 +260,13 @@ function normalizeBRWhatsappDigits(raw?: string): string {
   let d = onlyDigits(raw || "");
   if (!d) return "";
   d = d.replace(/^0+/, "");
-  while (d.startsWith("555")) d = "55" + d.slice(3);
+  console.log("normalizeBRWhatsappDigits:", raw, "->", d);
+  // A lógica antiga `while (d.startsWith("555"))` era muito agressiva e quebrava
+  // DDDs que começam com 5 (ex: 51, 53), pois `slice(3)` removia o '5' do DDD.
+  // A correção é tratar apenas o caso de duplicação do código de país (55).
+  if (d.startsWith("55555")) {
+    d = d.slice(2); // Remove o "55" duplicado, resultando em "55..."
+  }
   if (d.startsWith("55")) {
     let rest = d.slice(2);
     if (rest.length > 11) rest = rest.slice(0, 11);
