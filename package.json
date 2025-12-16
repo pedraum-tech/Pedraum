@@ -13,8 +13,7 @@
     "format": "prettier . --write",
     "analyze": "cross-env ANALYZE=true next build",
     "typecheck": "tsc --noEmit",
-    "postinstall": "node -e \"const fs=require('fs');const path=require('path');const src=require.resolve('pdfjs-dist/build/pdf.worker.min.mjs');const outDir=path.join(process.cwd(),'public');const out=path.join(outDir,'pdf.worker.min.mjs');fs.mkdirSync(outDir,{recursive:true});fs.copyFileSync(src,out);console.log('[react-pdf] Copiado:',src,'->',out);\"",
-    "prebuild": "node -e \"const fs=require('fs');const path=require('path');const src=require.resolve('pdfjs-dist/build/pdf.worker.min.mjs');const outDir=path.join(process.cwd(),'public');const out=path.join(outDir,'pdf.worker.min.mjs');fs.mkdirSync(outDir,{recursive:true});fs.copyFileSync(src,out);console.log('[react-pdf] (prebuild) Copiado:',src,'->',out);\""
+    "postinstall": "echo 'PDF worker is loaded from CDN, skipping local copy.'"
   },
   "engines": {
     "node": "20.x"
