@@ -15,21 +15,20 @@
     "incremental": true,
     "forceConsistentCasingInFileNames": true,
 
-    "strict": false,
+    /* Recomendação Forte: Mude para true para evitar bugs silenciosos */
+    "strict": true,
 
     "baseUrl": ".",
+    
+    /* AQUI ESTÁ A MÁGICA */
     "paths": {
-      "@/*": ["./*"],
-      "@/app/*": ["app/*"],
-      "@/components/*": ["components/*"],
-      "@/lib/*": ["lib/*"],
-      "@/server/*": ["server/*"]
+      "@/*": ["./src/*"]
     },
 
     "plugins": [{ "name": "next" }],
     "types": ["node"],
     "isolatedModules": true
   },
-  "include": ["next-env.d.ts", ".next/types/**/*.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
   "exclude": ["node_modules"]
 }

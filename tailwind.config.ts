@@ -1,11 +1,11 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  darkMode: "class", // Modo escuro por classe (padrão enterprise)
+  darkMode: "class",
   content: [
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./pages/**/*.{js,ts,jsx,tsx}",
+    // A MUDANÇA CRUCIAL ESTÁ AQUI:
+    // O "**" significa "qualquer subpasta" dentro de src.
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
@@ -20,9 +20,7 @@ const config: Config = {
       },
     },
     extend: {
-      // Design tokens via CSS custom properties
       colors: {
-        // Branding e tons
         brand: "var(--color-brand)",
         accent: "var(--color-accent)",
         highlight: "var(--color-highlight)",
@@ -69,10 +67,11 @@ const config: Config = {
   plugins: [
     require("@tailwindcss/typography"),
     require("@tailwindcss/forms"),
-    require("@tailwindcss/line-clamp"),
     require("@tailwindcss/aspect-ratio"),
     require("tailwind-scrollbar")({ nocompatible: true }),
-    // Instale plugins via npm install antes!
+    // Nota: Se você estiver usando Tailwind v3.3+, o "line-clamp" já vem embutido nativamente,
+    // mas mantive aqui para garantir compatibilidade se sua versão for anterior.
+    require("@tailwindcss/line-clamp"),
   ],
 };
 
