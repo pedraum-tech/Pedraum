@@ -59,6 +59,7 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.4",
+    "@playwright/test": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "autoprefixer": "^10.4.21",
