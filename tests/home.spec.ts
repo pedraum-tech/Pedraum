@@ -3,10 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('Home Page Smoke Tests', () => {
 
     test.beforeEach(async ({ page }) => {
-        // Muda disto:
-        // await page.goto('http://localhost:3000/');
-
-        // Para isto (espera menos coisas):
         await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
     });
 
