@@ -6,6 +6,8 @@ on:
   pull_request:
     branches: [ main ]
 
+# As variáveis são carregadas aqui e ficam disponíveis no process.env do Runner
+# Seu playwright-ct.config.ts vai ler daqui e injetar no navegador.
 env:
   # Firebase Configs
   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
@@ -20,24 +22,42 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 jobs:
-  # --- JOB 1: TESTES ---
+  # --- JOB 1: TESTES (Componentes + E2E) ---
   tests:
     name: 🧪 Run Tests
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
+          
       - name: Install dependencies
         run: npm ci
+        
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-      - name: Run Playwright tests
+
+      # -------------------------------------------------------
+      # 1. TESTES DE COMPONENTES (Roda Primeiro)
+      # -------------------------------------------------------
+      - name: 🧩 Run Component Tests (CT)
+        # Executa o script que configuramos no package.json
+        # Usa o playwright-ct.config.ts
+        run: npm run test-ct
+
+      # -------------------------------------------------------
+      # 2. TESTES END-TO-END (Só roda se CT passar)
+      # -------------------------------------------------------
+      - name: 🌐 Run E2E Tests
+        # Executa os testes padrão (usa playwright.config.ts se existir)
+        # Se você não tiver testes E2E configurados, pode remover esta etapa
+        if: success() 
         run: npx playwright test
 
-  # --- JOB 2: DEPLOY (Só roda se tests passar e for Main) ---
+  # --- JOB 2: DEPLOY (Só roda se TODOS os testes passarem e for Main) ---
   deploy:
     name: 🚀 Deploy to Vercel
     runs-on: ubuntu-latest
@@ -70,7 +90,7 @@ jobs:
         if: needs.tests.result == 'failure' || needs.deploy.result == 'failure'
         uses: dawidd6/action-send-mail@v3
         with:
-          server_address: smtp.gmail.com # Troque se não for Gmail (ex: smtp.live.com)
+          server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}

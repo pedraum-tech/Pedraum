@@ -13,7 +13,8 @@
     "format": "prettier . --write",
     "analyze": "cross-env ANALYZE=true next build",
     "typecheck": "tsc --noEmit",
-    "postinstall": "echo 'PDF worker is loaded from CDN, skipping local copy.'"
+    "postinstall": "echo 'PDF worker is loaded from CDN, skipping local copy.'",
+    "test-ct": "playwright test -c playwright-ct.config.ts"
   },
   "engines": {
     "node": "20.x"
@@ -59,11 +60,13 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.4",
+    "@playwright/experimental-ct-react": "^1.57.0",
     "@playwright/test": "^1.57.0",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "autoprefixer": "^10.4.21",
     "cross-env": "^10.1.0",
+    "dotenv": "^17.2.3",
     "eslint-plugin-prettier": "^5.5.4",
     "postcss": "^8.5.4",
     "prettier": "^3.6.2",
