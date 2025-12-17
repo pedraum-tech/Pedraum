@@ -244,8 +244,6 @@ export default function ImageUploader({
     }
   };
 
-  // Dentro do componente ImageUploader, antes do return:
-
   // Lógica de normalização: Garante que sempre teremos um array
   const listaImagens = Array.isArray(imagens)
     ? imagens
