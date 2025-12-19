@@ -527,7 +527,7 @@ export default function EditDemandaPage() {
       const rawImagens = d.imagens;
       const imagensNormalizadas = Array.isArray(rawImagens)
         ? rawImagens
-        : (typeof rawImagens === 'string' && rawImagens.length > 0)
+        : (typeof rawImagens === 'string' && (rawImagens as string).length > 0)
           ? [rawImagens] // Se for string, transforma em array
           : [];
 
