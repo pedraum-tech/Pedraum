@@ -520,7 +520,18 @@ export default function EditDemandaPage() {
 
 
       setTags(d.tags || []);
-      setImagens(d.imagens || []);
+      // 🔴 CÓDIGO ANTIGO (Problemático se vier string):
+      // setImagens(d.imagens || []);
+
+      // 🟢 CÓDIGO NOVO (Blindado):
+      const rawImagens = d.imagens;
+      const imagensNormalizadas = Array.isArray(rawImagens)
+        ? rawImagens
+        : (typeof rawImagens === 'string' && rawImagens.length > 0)
+          ? [rawImagens] // Se for string, transforma em array
+          : [];
+
+      setImagens(imagensNormalizadas);
       setPdfUrl(d.pdfUrl ?? null);
       setUserId(d.userId || "");
 
