@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '.env.local') });
 
 export default defineConfig({
-  testDir: './',
+  testDir: './src',
   snapshotDir: './__snapshots__',
   timeout: 60 * 1000, // Mantendo o timeout de 60s que definimos antes
   fullyParallel: true,

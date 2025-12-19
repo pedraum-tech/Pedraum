@@ -6,10 +6,8 @@ on:
   pull_request:
     branches: [ main ]
 
-# As variáveis são carregadas aqui e ficam disponíveis no process.env do Runner
-# Seu playwright-ct.config.ts vai ler daqui e injetar no navegador.
 env:
-  # Firebase Configs
+  # Seus segredos (Mantenha igual ao seu)
   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
   NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
@@ -17,12 +15,12 @@ env:
   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
   NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
   NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-  # Vercel Configs
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  CI: true # Avisa o Playwright que está rodando em CI
 
 jobs:
-  # --- JOB 1: TESTES (Componentes + E2E) ---
+  # --- JOB 1: TESTES ---
   tests:
     name: 🧪 Run Tests
     runs-on: ubuntu-latest
@@ -30,62 +28,69 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      # 1. Setup Node com CACHE (Acelera muito a instalação)
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 20
+          cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
         
+      # 2. Instala Browsers do Playwright (Cacheando se possível)
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # -------------------------------------------------------
-      # 1. TESTES DE COMPONENTES (Roda Primeiro)
-      # -------------------------------------------------------
+      # 3. TESTES DE COMPONENTES
       - name: 🧩 Run Component Tests (CT)
-        # Executa o script que configuramos no package.json
-        # Usa o playwright-ct.config.ts
-        run: npm run test-ct
+        run: npm run test:ct
 
-      # -------------------------------------------------------
-      # 2. TESTES END-TO-END (Só roda se CT passar)
-      # -------------------------------------------------------
+      # 4. TESTES E2E (Depende do CT passar)
       - name: 🌐 Run E2E Tests
-        # Executa os testes padrão (usa playwright.config.ts se existir)
-        # Se você não tiver testes E2E configurados, pode remover esta etapa
-        if: success() 
-        run: npx playwright test
+        # Usa o novo script que criamos
+        run: npm run test:e2e
 
-  # --- JOB 2: DEPLOY (Só roda se TODOS os testes passarem e for Main) ---
+      # 5. SALVAR RELATÓRIO DE ERRO (Crucial!)
+      # Só roda se os testes falharem. Você baixa um zip para ver o erro.
+      - name: Upload Playwright Report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 5
+
+  # --- JOB 2: DEPLOY ---
   deploy:
     name: 🚀 Deploy to Vercel
     runs-on: ubuntu-latest
     needs: tests
+    # Garante que só roda na branch main e se for um push (não PR)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
+      
+      # Vercel CLI Action (Mais limpo que instalar manualmente)
       - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          npm install --global vercel@latest
-          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-  # --- JOB 3: NOTIFICAÇÃO (Roda sempre) ---
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod' # Deploy de produção
+          
+  # --- JOB 3: NOTIFICAÇÃO ---
   notification:
     name: 🔔 Notify Via Email
     runs-on: ubuntu-latest
-    if: always() # Garante que rode mesmo se falhar antes
+    if: always() 
     needs: [tests, deploy]
     
     steps:
-      - name: Checkout (necessário para alguns plugins)
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # CASO 1: ERRO (Manda só para VOCÊ)
+      # CASO 1: ERRO
       - name: Send Failure Email to Dev
         if: needs.tests.result == 'failure' || needs.deploy.result == 'failure'
         uses: dawidd6/action-send-mail@v3
@@ -94,38 +99,28 @@ jobs:
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: ❌ FALHA no Deploy - Projeto Pedraum
-          # Corpo do email
+          subject: ❌ FALHA no Pipeline - Pedraum
           body: |
-            Ocorreu um erro na pipeline!
-            
-            Status Testes: ${{ needs.tests.result }}
-            Status Deploy: ${{ needs.deploy.result }}
-            
-            Veja os logs aqui: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Ocorreu um erro!
+            Testes: ${{ needs.tests.result }}
+            Deploy: ${{ needs.deploy.result }}
+            Logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           to: ${{ secrets.MY_EMAIL }}
           from: GitHub Actions <${{ secrets.MAIL_USERNAME }}>
 
-      # CASO 2: SUCESSO NO DEPLOY (Manda para VOCÊ e CLIENTE)
+      # CASO 2: SUCESSO (Cuidado aqui!)
       - name: Send Success Email to Client
-        if: needs.deploy.result == 'success'
+        # Só manda se o deploy foi sucesso E se for na main
+        if: needs.deploy.result == 'success' && github.ref == 'refs/heads/main'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: 🚀 Nova atualização disponível - Projeto Pedraum
-          # Corpo do email mais amigável para o cliente
+          subject: 🚀 Nova atualização disponível - Pedraum
           body: |
-            Olá!
-            
-            Uma nova versão do sistema acabou de ser publicada com sucesso.
-            
-            Acesse agora: https://pedraum.com.br/
-            
-            Atenciosamente,
-            Equipe de Desenvolvimento
-          # Manda para os dois emails separados por vírgula
+            Nova versão publicada com sucesso!
+            Acesse: https://pedraum.com.br/
           to: ${{ secrets.MY_EMAIL }},${{ secrets.CLIENT_EMAIL }}
           from: Sistema Pedraum <${{ secrets.MAIL_USERNAME }}>
