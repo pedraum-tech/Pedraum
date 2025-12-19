@@ -28,7 +28,8 @@ test.describe('Home Page Smoke Tests', () => {
         });
 
         // Espera um pouco para garantir que scripts carregaram
-        await page.waitForLoadState('networkidle');
+        // await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('domcontentloaded');
 
         // Se houver erros de "Connection refused" do Firebase, podemos ignorar neste teste simples,
         // mas erros de React devem falhar o teste.

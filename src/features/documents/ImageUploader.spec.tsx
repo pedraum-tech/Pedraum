@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/experimental-ct-react';
-import ImageUploader from '../../../src/features/documents/ImageUploader';
+import ImageUploader from './ImageUploader';
 
 test.use({ viewport: { width: 800, height: 800 } });
 
