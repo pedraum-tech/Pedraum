@@ -14,8 +14,14 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID, 
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
+
+// DICA DE DEBUG: Adicione isso temporariamente antes do initializeApp
+if (!firebaseConfig.apiKey) {
+  console.error('ERRO CRÍTICO: Firebase API Key não foi encontrada nas variáveis de ambiente!');
+  console.log('Variáveis carregadas:', process.env); // Cuidado para não vazar segredos em logs públicos
+}
 
 // Lógica para evitar inicializar o Firebase múltiplas vezes no Next.js (Singleton)
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
