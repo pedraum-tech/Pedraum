@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
+  release:
+    types: [published]
   pull_request:
     branches: [ main ]
 
@@ -111,16 +113,25 @@ jobs:
       # CASO 2: SUCESSO (Cuidado aqui!)
       - name: Send Success Email to Client
         # Só manda se o deploy foi sucesso E se for na main
-        if: needs.deploy.result == 'success' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'release' && needs.deploy.result == 'success'
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          subject: 🚀 Nova atualização disponível - Pedraum
+          subject: 🚀 Novidades no Pedraum - Versão ${{ github.event.release.tag_name }}
           body: |
-            Nova versão publicada com sucesso!
-            Acesse: https://pedraum.com.br/
+            Olá! Uma nova atualização do Pedraum está disponível.
+            
+            O que há de novo nesta versão:
+            --------------------------------------------------
+            ${{ github.event.release.body }}
+            --------------------------------------------------
+            
+            Acesse agora: https://pedraum.com.br/
+            
+            Atenciosamente,
+            Equipe Pedraum
           to: ${{ secrets.MY_EMAIL }},${{ secrets.CLIENT_EMAIL }}
           from: Sistema Pedraum <${{ secrets.MAIL_USERNAME }}>
