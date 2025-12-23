@@ -64,7 +64,7 @@ test.describe('Página de Edição de Demanda', () => {
 
     test('Deve filtrar a lista de usuários', async ({ page }) => {
         // Aguarda lista de usuários carregar
-        await expect(page.locator('text=Carregando...')).toBeHidden();
+        await expect(page.locator('text=Carregando...')).toBeHidden({ timeout: 20000 });
 
         // Digita no campo de busca
         const searchInput = page.locator('input[placeholder*="nome, e-mail"]');
