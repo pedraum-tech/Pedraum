@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 // Substitua por um ID que exista no seu banco de dados de teste/dev
-const DEMANDA_ID = process.env.DEMANDA_ID;
+const DEMANDA_ID = process.env.DEMANDA_ID_TEST;
 
 test.describe('Página de Edição de Demanda', () => {
 
@@ -11,8 +11,8 @@ test.describe('Página de Edição de Demanda', () => {
         await page.goto('http://localhost:3000/auth/login'); // ou sua rota de login
 
         // 2. Preencher credenciais (use um user de teste)
-        await page.fill('input[type="email"]', process.env.ADMIN_EMAIL || '');
-        await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD || '');
+        await page.fill('input[type="email"]', process.env.ADMIN_EMAIL_TEST || '');
+        await page.fill('input[type="password"]', process.env.ADMIN_PASSWORD_TEST || '');
         await page.click('button[type="submit"]');
 
         // 3. Agora sim, navegar para a demanda
@@ -41,6 +41,26 @@ test.describe('Página de Edição de Demanda', () => {
         // Verifica status
         await expect(page.locator('text=Status:')).toBeVisible();
     });
+
+    // test('Deve permitir editar o título e salvar', async ({ page }) => {
+    //     // Mock do alert do navegador
+    //     page.on('dialog', async dialog => {
+    //         expect(dialog.message()).toContain('Demanda atualizada com sucesso');
+    //         await dialog.accept();
+    //     });
+
+    //     const novoTitulo = `Teste Automação ${Date.now()}`;
+
+    //     await page.fill('input[name="titulo"]', novoTitulo);
+
+    //     // Clica em Salvar
+    //     await page.click('button:has-text("Salvar Alterações")');
+
+    //     // Opcional: Recarregar página e verificar persistência
+    //     await page.reload();
+    //     await expect(page.locator('text=Carregando demanda...')).toBeHidden();
+    //     await expect(page.locator('input[name="titulo"]')).toHaveValue(novoTitulo);
+    // });
 
     test('Deve filtrar a lista de usuários', async ({ page }) => {
         // Aguarda lista de usuários carregar
