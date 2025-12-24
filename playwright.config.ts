@@ -36,7 +36,7 @@ export default defineConfig({
     /* Base URL to use in actions like `await page.goto('')`. */
     baseURL: 'http://localhost:3000',
     // Diz para todos os testes usarem esse estado de login
-    storageState: 'playwright/.auth/user.json',
+    storageState: path.resolve(__dirname, 'playwright/.auth/user.json'),
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
