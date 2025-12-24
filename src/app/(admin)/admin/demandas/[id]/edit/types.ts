@@ -1,0 +1,93 @@
+export type DemandaStatus = "pending" | "approved" | "rejected";
+export type PaymentStatus = "pending" | "paid";
+export type AssignmentStatus = "sent" | "viewed" | "unlocked" | "canceled";
+
+export type Usuario = {
+    id: string;
+    nome?: string;
+    email?: string;
+    whatsapp?: string;
+    whatsappE164?: string;
+    telefone?: string;
+    estado?: string;
+    ufs?: string[];
+    ufsAtendidas?: string[];
+    atendeBrasil?: boolean;
+    cidade?: string;
+    categorias?: string[];
+    categoriasAtuacaoPairs?: { categoria: string; subcategoria?: string }[];
+    atuacaoBasica?: {
+        categoria: string;
+        subcategoria?: string;
+        vendaProdutos?: { ativo?: boolean; obs?: string };
+        vendaPecas?: { ativo?: boolean; obs?: string };
+        servicos?: { ativo?: boolean; obs?: string };
+    }[];
+    categoriesAll?: string[];
+    photoURL?: string;
+    bio?: string;
+    descricaoPublica?: string;
+    sobre?: string;
+    observacoesPublicas?: string;
+    patrocinador?: boolean;
+    rating?: number;
+    jobsConcluidos?: number;
+    createdAt?: any;
+    ultimaAtividade?: any;
+    recebeGratisDemandas?: boolean;
+    demStatsTotalSent?: number;
+    demStatsUnlocked?: number;
+    demStatsFree?: number;
+};
+
+export type Assignment = {
+    id: string;
+    demandId: string;
+    supplierId: string;
+    status: AssignmentStatus;
+    pricing?: {
+        amount?: number;
+        currency?: string;
+        exclusive?: boolean;
+        cap?: number | null;
+        soldCount?: number;
+    };
+    paymentStatus?: PaymentStatus;
+    billingType?: "free" | "paid";
+    createdAt?: any;
+    updatedAt?: any;
+    unlockedByAdmin?: boolean;
+    unlockedAt?: any;
+    notes?: string;
+};
+
+export type Demanda = {
+    titulo?: string;
+    descricao?: string;
+    categoria?: string;
+    subcategoria?: string;
+    estado?: string;
+    cidade?: string;
+    prazo?: string;
+    orcamento?: number | string | null;
+    whatsapp?: string;
+    observacoes?: string;
+    imagens?: string[];
+    pdfUrl?: string | null;
+    tags?: string[];
+    pricingDefault?: { amount?: number; currency?: string };
+    createdAt?: any;
+    updatedAt?: any;
+    status?: DemandaStatus | string;
+    userId?: string;
+    unlockCap?: number | null;
+    liberadoPara?: string[];
+    autorNome?: string;
+    autorEmail?: string;
+    autorWhatsapp?: string;
+    contatoNome?: string;
+    contatoEmail?: string;
+    contatoWhatsappE164?: string;
+    contatoWhatsappMasked?: string;
+    liberacoesCount?: number;
+};
