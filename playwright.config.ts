@@ -17,6 +17,7 @@ dotenv.config({ path: path.resolve(__dirname, '.env.local') });
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+
   timeout: 60 * 1000, // Aumenta de 30s para 60s
   testDir: './e2e',
   /* Run tests in files in parallel */
@@ -30,9 +31,12 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+  globalSetup: path.resolve(__dirname, './e2e/global-setup'), // Aponta para o arquivo criado acima
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    // baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3000',
+    // Diz para todos os testes usarem esse estado de login
+    storageState: 'playwright/.auth/user.json',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
