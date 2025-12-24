@@ -3,9 +3,11 @@ import { chromium, FullConfig } from '@playwright/test';
 async function globalSetup(config: FullConfig) {
     console.log('--- Iniciando Global Setup ---');
 
+    const isCI = !!process.env.CI;
+
     // headless: false permite ver o navegador abrindo. Útil para debug.
     // Mude para true quando tudo estiver funcionando.
-    const browser = await chromium.launch({ headless: false });
+    const browser = await chromium.launch({ headless: isCI });
     const page = await browser.newPage();
 
     console.log('1. Acessando página de login...');
