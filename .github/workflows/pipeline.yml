@@ -51,6 +51,10 @@ jobs:
       - name: 🌐 Run E2E Tests
         # Usa o novo script que criamos
         run: npm run test:e2e
+        env:
+          # Variáveis de ambiente para o login de teste
+          ADMIN_EMAIL_TEST: ${{ secrets.ADMIN_EMAIL_TEST }}
+          ADMIN_PASSWORD_TEST: ${{ secrets.ADMIN_PASSWORD_TEST }}
 
       # 5. SALVAR RELATÓRIO DE ERRO (Crucial!)
       # Só roda se os testes falharem. Você baixa um zip para ver o erro.
