@@ -34,7 +34,7 @@ export default defineConfig({
   globalSetup: path.resolve(__dirname, './e2e/global-setup'), // Aponta para o arquivo criado acima
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:3000',
     // Diz para todos os testes usarem esse estado de login
     storageState: path.resolve(__dirname, 'playwright/.auth/user.json'),
 
@@ -44,7 +44,7 @@ export default defineConfig({
   // ADICIONE ESTE BLOCO AQUI:
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:3000',
+    url: 'http://127.0.0.1:3000',
     reuseExistingServer: !process.env.CI, // Se você já estiver rodando o server, ele usa o seu.
     timeout: 120 * 1000, // Dá 2 minutos para o server subir (Next.js as vezes demora no primeiro build)
   },
