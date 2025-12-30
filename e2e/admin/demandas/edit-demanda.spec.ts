@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 // Substitua por um ID que exista no seu banco de dados de teste/dev
 const DEMANDA_ID = process.env.DEMANDA_ID_TEST;
-const url_test = process.env.BASE_URL || 'http://localhost:3000';
+const url_test = process.env.BASE_URL || 'http://127.0.0.1:3000';
 
 test.describe('Página de Edição de Demanda', () => {
 
@@ -32,64 +32,64 @@ test.describe('Página de Edição de Demanda', () => {
         // await expect(page.locator('h1')).toHaveText(/Edição de Demanda/i);
     });
 
-    // test('Deve carregar os dados iniciais corretamente', async ({ page }) => {
-    //     // Verifica se campos chave estão preenchidos
-    //     const inputTitulo = page.locator('input[name="titulo"]');
-    //     await expect(inputTitulo).toBeVisible();
-    //     // Verifica se veio valor do banco (não está vazio)
-    //     await expect(inputTitulo).not.toHaveValue('');
+    test('Deve carregar os dados iniciais corretamente', async ({ page }) => {
+        // Verifica se campos chave estão preenchidos
+        const inputTitulo = page.locator('input[name="titulo"]');
+        await expect(inputTitulo).toBeVisible();
+        // Verifica se veio valor do banco (não está vazio)
+        await expect(inputTitulo).not.toHaveValue('');
 
-    //     // Verifica status
-    //     await expect(page.locator('text=Status:')).toBeVisible();
+        // Verifica status
+        await expect(page.locator('text=Status:')).toBeVisible();
+    });
+
+    // test('Deve permitir editar o título e salvar', async ({ page }) => {
+    //     // Mock do alert do navegador
+    //     page.on('dialog', async dialog => {
+    //         expect(dialog.message()).toContain('Demanda atualizada com sucesso');
+    //         await dialog.accept();
+    //     });
+
+    //     const novoTitulo = `Teste Automação ${Date.now()}`;
+
+    //     await page.fill('input[name="titulo"]', novoTitulo);
+
+    //     // Clica em Salvar
+    //     await page.click('button:has-text("Salvar Alterações")');
+
+    //     // Opcional: Recarregar página e verificar persistência
+    //     await page.reload();
+    //     await expect(page.locator('text=Carregando demanda...')).toBeHidden();
+    //     await expect(page.locator('input[name="titulo"]')).toHaveValue(novoTitulo);
     // });
 
-    // // test('Deve permitir editar o título e salvar', async ({ page }) => {
-    // //     // Mock do alert do navegador
-    // //     page.on('dialog', async dialog => {
-    // //         expect(dialog.message()).toContain('Demanda atualizada com sucesso');
-    // //         await dialog.accept();
-    // //     });
+    test('Deve filtrar a lista de usuários', async ({ page }) => {
+        // Aguarda lista de usuários carregar
+        await expect(page.locator('text=Carregando...')).toBeHidden({ timeout: 20000 });
 
-    // //     const novoTitulo = `Teste Automação ${Date.now()}`;
+        // Digita no campo de busca
+        const searchInput = page.locator('input[placeholder*="nome, e-mail"]');
+        await searchInput.fill('UsuarioInexistenteXYZ');
 
-    // //     await page.fill('input[name="titulo"]', novoTitulo);
+        // Verifica mensagem de "Nenhum usuário encontrado" ou lista vazia
+        // Baseado no seu código: "Nenhum usuário encontrado. Ajuste os filtros/busca."
+        await expect(page.locator('text=Nenhum usuário encontrado')).toBeVisible();
 
-    // //     // Clica em Salvar
-    // //     await page.click('button:has-text("Salvar Alterações")');
+        // Limpa busca
+        await page.click('button:has-text("Limpar")');
+        await expect(page.locator('text=Nenhum usuário encontrado')).toBeHidden();
+    });
 
-    // //     // Opcional: Recarregar página e verificar persistência
-    // //     await page.reload();
-    // //     await expect(page.locator('text=Carregando demanda...')).toBeHidden();
-    // //     await expect(page.locator('input[name="titulo"]')).toHaveValue(novoTitulo);
-    // // });
+    test('Deve abrir o modal de perfil ao clicar em Ver Perfil', async ({ page }) => {
+        // Localiza o primeiro botão "Ver perfil" visível
+        const btnVerPerfil = page.locator('button:has-text("Ver perfil")').first();
+        await btnVerPerfil.click();
 
-    // test('Deve filtrar a lista de usuários', async ({ page }) => {
-    //     // Aguarda lista de usuários carregar
-    //     await expect(page.locator('text=Carregando...')).toBeHidden({ timeout: 20000 });
+        // Verifica se o modal abriu
+        await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeVisible();
 
-    //     // Digita no campo de busca
-    //     const searchInput = page.locator('input[placeholder*="nome, e-mail"]');
-    //     await searchInput.fill('UsuarioInexistenteXYZ');
-
-    //     // Verifica mensagem de "Nenhum usuário encontrado" ou lista vazia
-    //     // Baseado no seu código: "Nenhum usuário encontrado. Ajuste os filtros/busca."
-    //     await expect(page.locator('text=Nenhum usuário encontrado')).toBeVisible();
-
-    //     // Limpa busca
-    //     await page.click('button:has-text("Limpar")');
-    //     await expect(page.locator('text=Nenhum usuário encontrado')).toBeHidden();
-    // });
-
-    // test('Deve abrir o modal de perfil ao clicar em Ver Perfil', async ({ page }) => {
-    //     // Localiza o primeiro botão "Ver perfil" visível
-    //     const btnVerPerfil = page.locator('button:has-text("Ver perfil")').first();
-    //     await btnVerPerfil.click();
-
-    //     // Verifica se o modal abriu
-    //     await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeVisible();
-
-    //     // Fecha o modal
-    //     await page.click('button:has-text("Fechar")');
-    //     await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeHidden();
-    // });
+        // Fecha o modal
+        await page.click('button:has-text("Fechar")');
+        await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeHidden();
+    });
 });
