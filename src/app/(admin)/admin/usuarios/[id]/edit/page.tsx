@@ -978,7 +978,7 @@ export default function AdminEditarUsuarioPage() {
       const json = await res.json();
       if (!res.ok) {
         if (res.status === 401) throw new Error("Sessão inválida/expirada (401). Faça login novamente.");
-        if (res.status === 403) throw new Error("Seu usuário não está autorizado. Verifique ADMIN_EMAILS/ADMIN_ALLOWED_EMAILS.");
+        if (res.status === 403) throw new Error("Seu usuário não está autorizado. Verifique ADMIN_EMAILS/ADMIN_ALLOWED_EMAILS.(Acesso negado (403). O e-mail do admin logado não está na lista de permissões do servidor. Verifique a variável de ambiente ADMIN_EMAILS.)");
         throw new Error(json?.message || json?.error || "Falha ao redefinir senha.");
       }
 
