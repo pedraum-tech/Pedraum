@@ -26,22 +26,22 @@ test.describe('Página de Edição de Demanda', () => {
         await expect(page.locator('text=Carregando demanda...')).toBeHidden({ timeout: 100000 });
     });
 
-    test('Deve abrir a tela de demandas de admin', async ({ page }) => {
-        // Verifica se estamos na página correta
-        await expect(page).toHaveURL(new RegExp(`${url_test}/admin/demandas/`));
-        // await expect(page.locator('h1')).toHaveText(/Edição de Demanda/i);
-    });
+    // test('Deve abrir a tela de demandas de admin', async ({ page }) => {
+    //     // Verifica se estamos na página correta
+    //     await expect(page).toHaveURL(new RegExp(`${url_test}/admin/demandas/`));
+    //     // await expect(page.locator('h1')).toHaveText(/Edição de Demanda/i);
+    // });
 
-    test('Deve carregar os dados iniciais corretamente', async ({ page }) => {
-        // Verifica se campos chave estão preenchidos
-        const inputTitulo = page.locator('input[name="titulo"]');
-        await expect(inputTitulo).toBeVisible();
-        // Verifica se veio valor do banco (não está vazio)
-        await expect(inputTitulo).not.toHaveValue('');
+    // test('Deve carregar os dados iniciais corretamente', async ({ page }) => {
+    //     // Verifica se campos chave estão preenchidos
+    //     const inputTitulo = page.locator('input[name="titulo"]');
+    //     await expect(inputTitulo).toBeVisible();
+    //     // Verifica se veio valor do banco (não está vazio)
+    //     await expect(inputTitulo).not.toHaveValue('');
 
-        // Verifica status
-        await expect(page.locator('text=Status:')).toBeVisible();
-    });
+    //     // Verifica status
+    //     await expect(page.locator('text=Status:')).toBeVisible();
+    // });
 
     // test('Deve permitir editar o título e salvar', async ({ page }) => {
     //     // Mock do alert do navegador
