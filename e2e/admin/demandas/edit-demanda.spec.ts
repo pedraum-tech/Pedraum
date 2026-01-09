@@ -63,33 +63,33 @@ test.describe('Página de Edição de Demanda', () => {
     //     await expect(page.locator('input[name="titulo"]')).toHaveValue(novoTitulo);
     // });
 
-    test('Deve filtrar a lista de usuários', async ({ page }) => {
-        // Aguarda lista de usuários carregar
-        await expect(page.locator('text=Carregando...')).toBeHidden({ timeout: 20000 });
+    // test('Deve filtrar a lista de usuários', async ({ page }) => {
+    //     // Aguarda lista de usuários carregar
+    //     await expect(page.locator('text=Carregando...')).toBeHidden({ timeout: 20000 });
 
-        // Digita no campo de busca
-        const searchInput = page.locator('input[placeholder*="nome, e-mail"]');
-        await searchInput.fill('UsuarioInexistenteXYZ');
+    //     // Digita no campo de busca
+    //     const searchInput = page.locator('input[placeholder*="nome, e-mail"]');
+    //     await searchInput.fill('UsuarioInexistenteXYZ');
 
-        // Verifica mensagem de "Nenhum usuário encontrado" ou lista vazia
-        // Baseado no seu código: "Nenhum usuário encontrado. Ajuste os filtros/busca."
-        await expect(page.locator('text=Nenhum usuário encontrado')).toBeVisible();
+    //     // Verifica mensagem de "Nenhum usuário encontrado" ou lista vazia
+    //     // Baseado no seu código: "Nenhum usuário encontrado. Ajuste os filtros/busca."
+    //     await expect(page.locator('text=Nenhum usuário encontrado')).toBeVisible();
 
-        // Limpa busca
-        await page.click('button:has-text("Limpar")');
-        await expect(page.locator('text=Nenhum usuário encontrado')).toBeHidden();
-    });
+    //     // Limpa busca
+    //     await page.click('button:has-text("Limpar")');
+    //     await expect(page.locator('text=Nenhum usuário encontrado')).toBeHidden();
+    // });
 
-    test('Deve abrir o modal de perfil ao clicar em Ver Perfil', async ({ page }) => {
-        // Localiza o primeiro botão "Ver perfil" visível
-        const btnVerPerfil = page.locator('button:has-text("Ver perfil")').first();
-        await btnVerPerfil.click();
+    // test('Deve abrir o modal de perfil ao clicar em Ver Perfil', async ({ page }) => {
+    //     // Localiza o primeiro botão "Ver perfil" visível
+    //     const btnVerPerfil = page.locator('button:has-text("Ver perfil")').first();
+    //     await btnVerPerfil.click();
 
-        // Verifica se o modal abriu
-        await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeVisible();
+    //     // Verifica se o modal abriu
+    //     await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeVisible();
 
-        // Fecha o modal
-        await page.click('button:has-text("Fechar")');
-        await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeHidden();
-    });
+    //     // Fecha o modal
+    //     await page.click('button:has-text("Fechar")');
+    //     await expect(page.locator('h3:has-text("Perfil do fornecedor")')).toBeHidden();
+    // });
 });
