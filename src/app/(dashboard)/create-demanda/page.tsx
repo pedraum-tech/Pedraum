@@ -426,7 +426,7 @@ function CreateDemandaContent() {
             </div>
           </div>
 
-          {/* Dados do autor */}
+          {/* Dados do autor
           <div
             className="rounded-2xl border p-4"
             style={{ borderColor: "#e6ebf2", background: "#fff" }}
@@ -487,7 +487,7 @@ function CreateDemandaContent() {
                 )}
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Anexos */}
           <div
