@@ -10,22 +10,18 @@ test.describe('ImageUploader Component', () => {
 
     // 1. TESTE DA CORREÇÃO (O BUG DO HTTPS)
     test('deve normalizar e renderizar corretamente quando a prop "imagens" é uma string única', async ({ mount }) => {
-        // Cenário: O banco retornou apenas uma string, não um array
         const urlUnica = 'https://via.placeholder.com/150';
 
         const component = await mount(
             <ImageUploader
-                imagens={urlUnica as any} // Forçando o tipo para simular o retorno "sujo" do banco
+                imagens={urlUnica as any}
                 setImagens={mockSetImagens}
             />
         );
 
-        // Verificação: Deve haver exatamente 1 imagem renderizada
         await expect(component.locator('img')).toHaveCount(1);
         await expect(component.locator('img')).toHaveAttribute('src', urlUnica);
-
-        // Confirma que não quebrou a string (ex: não pegou só o 'h' ou 'https')
-        await expect(component.getByText(urlUnica)).toBeHidden(); // Garante que não vazou texto na tela
+        await expect(component.getByText(urlUnica)).toBeHidden();
     });
 
     // 2. TESTE DE ARRAY PADRÃO
@@ -40,60 +36,78 @@ test.describe('ImageUploader Component', () => {
         );
 
         await expect(component.locator('img')).toHaveCount(2);
-        await expect(component.getByText('2/5')).toBeVisible(); // Confirma o contador
+        // Verifica se o contador exibe o texto correto (ex: "2/5")
+        // Nota: Ajuste o texto abaixo conforme o que seu componente renderiza exatamente nas labels
+        await expect(component.getByText('2/5')).toBeVisible();
     });
 
-    // 3. TESTE DE LIMITE (MAX)
+    // 3. TESTE DE LIMITE (MAX) - DESCOMENTADO E AJUSTADO
     test('deve bloquear upload e mostrar aviso quando limite é atingido', async ({ mount }) => {
-        const listaCheia = [
-            'url1', 'url2', 'url3'
-        ];
+        const listaCheia = ['url1', 'url2', 'url3'];
 
         const component = await mount(
             <ImageUploader
                 imagens={listaCheia}
                 setImagens={mockSetImagens}
-                max={3} // Limite igual ao tamanho da lista
+                max={3}
             />
         );
 
-        // O input de arquivo deve sumir ou o texto de limite deve aparecer
+        // Verifica se a mensagem de limite aparece
+        // O texto padrão no seu componente é "Limite de {max} imagens atingido."
         await expect(component.getByText('Limite de 3 imagens atingido.')).toBeVisible();
 
-        // O botão de "Selecionar imagens" não deve estar visível
+        // O botão de "Selecionar imagens" deve sumir quando o limite é atingido
         await expect(component.getByRole('button', { name: 'Selecionar imagens' })).toBeHidden();
     });
 
-    // 4. TESTE DE INTERAÇÃO DE UPLOAD (Simulado)
+    // 4. TESTE DE INTERAÇÃO DE UPLOAD
     test('deve acionar o input de arquivo ao clicar no botão', async ({ mount, page }) => {
         const component = await mount(
             <ImageUploader imagens={[]} setImagens={mockSetImagens} />
         );
 
-        // Prepara para "pegar" o evento de abrir janelas de arquivo
         const fileChooserPromise = page.waitForEvent('filechooser');
 
-        // Clica no botão
+        // Clica no botão azul principal
         await component.getByRole('button', { name: 'Selecionar imagens' }).click();
 
-        // Aguarda o seletor de arquivos abrir
         const fileChooser = await fileChooserPromise;
         expect(fileChooser).toBeTruthy();
-
-        // Nota: Não prosseguimos com o upload real aqui para não chamar o Firebase de verdade no teste.
-        // Para testar o upload completo, seria necessário mockar as funções do firebase/storage.
     });
 
-    // 5. TESTE VISUAL DE REMOÇÃO
-    test('deve exibir botão de remover em cima da imagem', async ({ mount }) => {
+    // 5. TESTE VISUAL DE REMOÇÃO - ATUALIZADO PARA O NOVO LAYOUT
+    test('deve exibir botão de remover acessível no card', async ({ mount }) => {
         const component = await mount(
             <ImageUploader imagens={['https://teste.com/img.jpg']} setImagens={mockSetImagens} />
         );
 
-        const containerImagem = component.locator('.relative.group').first();
+        // AQUI MUDOU: O botão não está mais "sobre" a imagem, mas faz parte do card.
+        // Como adicionamos <span className="sr-only">Remover</span> no componente, 
+        // podemos buscar pelo "Accessible Name", que é a melhor prática.
 
-        // Verifica se o botão de remover (ícone de lixeira/X) existe
-        const btnRemover = containerImagem.locator('button[title="Remover"]');
+        const btnRemover = component.getByRole('button', { name: 'Remover' }).first();
+
+        // Verifica se ele existe e está visível na tela
         await expect(btnRemover).toBeVisible();
+
+        // Opcional: Verificar se o ícone SVG está dentro dele
+        await expect(btnRemover.locator('svg')).toBeVisible();
+    });
+
+    // 6. NOVO TESTE: REORDENAÇÃO (Já que você tem botões de mover)
+    test('deve exibir botões de mover quando enableReorder é true', async ({ mount }) => {
+        const component = await mount(
+            <ImageUploader
+                imagens={['url1', 'url2']}
+                setImagens={mockSetImagens}
+                enableReorder={true}
+            />
+        );
+
+        // Verifica se existem botões com as setinhas
+        // Seus botões têm title="Mover para a esquerda" e "Mover para a direita"
+        await expect(component.locator('button[title="Mover para a esquerda"]').first()).toBeVisible();
+        await expect(component.locator('button[title="Mover para a direita"]').first()).toBeVisible();
     });
 });
