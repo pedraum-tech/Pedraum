@@ -154,7 +154,14 @@ function isPatrocinador(u: UsuarioDoc) {
 
 /** Retorna o campo correto de criação (createdAt | criadoEm | criadoem | created_at) */
 function getCreatedAt(u: UsuarioDoc) {
-  return u.createdAt ?? (u as any).criadoEm ?? (u as any).criadoem ?? (u as any).created_at;
+  return (
+    u.createdAt ??
+    (u as any).criadoEm ??
+    (u as any).criadoem ??
+    (u as any).created_at ??
+    (u as any).dataCadastro ?? // Adicionado para garantir
+    (u as any).registrationDate
+  );
 }
 
 /* ========================= Página ========================= */
@@ -186,6 +193,7 @@ function UsuariosAdminPage() {
   const [fSomenteMelhorados, setFSomenteMelhorados] = useState(false);
   const [fSemWhats, setFSemWhats] = useState(false);
   const [fTag, setFTag] = useState("");
+  const [fPeriodoCadastro, setFPeriodoCadastro] = useState<"" | "7" | "30" | "90">("");
 
   // seleção em massa
   const [selecionados, setSelecionados] = useState<Record<string, boolean>>({});
@@ -334,13 +342,32 @@ function UsuariosAdminPage() {
         if (!(u.role === fRole || u.tipo === fRole)) return false;
       }
     }
-    // Período de cadastro
+    // Filtro de Período (Refatorado)
     if (fPeriodoCadastro) {
       const dias = Number(fPeriodoCadastro);
+
+      // 1. Define a data limite (Hoje - X dias)
+      const dataLimite = new Date();
+      dataLimite.setDate(dataLimite.getDate() - dias);
+      dataLimite.setHours(0, 0, 0, 0); // Zera hora para comparar apenas o dia
+
+      // 2. Pega a data do usuário usando o helper atualizado
       const cAt = tsToDate(getCreatedAt(u));
+
+      // // Coloque isso dentro do if (fPeriodoCadastro) para testar
+      // console.log('DEBUG FILTRO:', {
+      //   nome: u.nome,
+      //   dataUsuario: cAt,
+      //   dataLimite: dataLimite,
+      //   vaiEsconder: cAt < dataLimite
+      // });
+
+      // 3. Regras de exclusão:
+      // Se o usuário não tem data, não é recente -> esconde (return false)
       if (!cAt) return false;
-      const diffDias = (Date.now() - cAt.getTime()) / (1000 * 60 * 60 * 24);
-      if (diffDias > dias) return false;
+
+      // Se a data do usuário for ANTERIOR à data limite, é antigo -> esconde (return false)
+      if (cAt < dataLimite) return false;
     }
 
 
@@ -400,6 +427,7 @@ function UsuariosAdminPage() {
     fSomenteMelhorados,
     fSemWhats,
     fTag,
+    fPeriodoCadastro,
   ]);
 
   /* ==================== Ciclo de vida ==================== */
@@ -709,7 +737,6 @@ function UsuariosAdminPage() {
     [listaExibida, visibleMax],
   );
   const fimDaLista = paginada.length >= listaExibida.length;
-  const [fPeriodoCadastro, setFPeriodoCadastro] = useState<"" | "7" | "30" | "90">("");
 
   return (
     <main
