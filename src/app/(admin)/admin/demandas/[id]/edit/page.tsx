@@ -77,7 +77,7 @@ export default function EditDemandaPage() {
   const [liberacoesCount, setLiberacoesCount] = useState<number>(0);
 
   // Usuários
-  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [allUsuarios, setAllUsuarios] = useState<Usuario[]>([]);
   const [loadingUsuarios, setLoadingUsuarios] = useState(false);
   const [selUsuarios, setSelUsuarios] = useState<string[]>([]);
   const [envLoading, setEnvLoading] = useState(false);
@@ -184,87 +184,92 @@ export default function EditDemandaPage() {
   // Busca de usuários
   const userCacheRef = useRef<Map<string, Usuario>>(new Map());
 
-  async function smartFetchUsuarios() {
+  // Busca todos os usuários do Firestore. Executado apenas uma vez.
+  async function fetchAllUsuarios() {
     setLoadingUsuarios(true);
     try {
       const collectionsToRead = ["usuarios", "users", "user"];
       const mapById = new Map<string, Usuario>();
-      const mapByEmail = new Map<string, string>();
 
-      for (const colName of collectionsToRead) {
+      await Promise.all(collectionsToRead.map(async (colName) => {
         try {
-          const snap = await getDocs(query(collection(db, colName), orderBy("nome"), limit(1200)));
+          // Aumentamos o limite para garantir que todos os usuários sejam carregados para a filtragem no cliente.
+          const snap = await getDocs(query(collection(db, colName), limit(2500)));
           snap.forEach((d) => {
             const u = docToUsuario(d);
-            if (!u.id) return;
-            if (!mapById.has(u.id)) {
-              mapById.set(u.id, u);
-              userCacheRef.current.set(u.id, u);
-            }
-            const mail = (u.email || "").trim().toLowerCase();
-            if (mail && !mapByEmail.has(mail)) mapByEmail.set(mail, u.id);
+            if (!u.id || mapById.has(u.id)) return; // Evita duplicatas se o usuário existir em mais de uma coleção
+            mapById.set(u.id, u);
+            userCacheRef.current.set(u.id, u);
           });
-        } catch { }
-      }
+        } catch (e) {
+          console.warn(`Aviso: Falha ao ler a coleção de usuários '${colName}'.`, e);
+        }
+      }));
 
-      let all = Array.from(mapById.values());
-      const ufFilter = (fUF || "").trim();
-      const catFilter = norm(fCat);
-      const tipoFilter = (fTipo || "").toLowerCase();
-
-      if (catFilter) {
-        all = all.filter((u) => {
-          const cats: string[] = [];
-          if (Array.isArray(u.categorias)) cats.push(...u.categorias);
-          if (Array.isArray(u.categoriesAll)) cats.push(...u.categoriesAll);
-          if (Array.isArray(u.categoriasAtuacaoPairs)) cats.push(...u.categoriasAtuacaoPairs.map((p) => p?.categoria));
-          if (Array.isArray(u.atuacaoBasica)) cats.push(...u.atuacaoBasica.map((a) => a?.categoria));
-          return cats.some((c) => c && norm(c).includes(catFilter));
-        });
-      }
-
-      if (ufFilter) {
-        const wantedUF = (ufFilter.length === 2 && UFS.includes(ufFilter as any)) ? ufFilter : ufFilter.toUpperCase();
-        all = all.filter((u) => {
-          if (wantedUF === "BRASIL" || u.atendeBrasil) return true;
-          const setUF = getUFSetFromUser(u);
-          return setUF.has(wantedUF) || setUF.has("BRASIL");
-        });
-      }
-
-      if (tipoFilter) {
-        all = all.filter((u) => {
-          const arr = Array.isArray(u.atuacaoBasica) ? u.atuacaoBasica : [];
-          return arr.some((a) => {
-            if (!a) return false;
-            if (tipoFilter === "venda") return !!a.vendaProdutos?.ativo;
-            if (tipoFilter === "pecas") return !!a.vendaPecas?.ativo;
-            if (tipoFilter === "servicos") return !!a.servicos?.ativo;
-            return false;
-          });
-        });
-      }
-
+      const all = Array.from(mapById.values());
       all.sort((a, b) => (a.nome || "").localeCompare(b.nome || ""));
-      setUsuarios(all);
+      setAllUsuarios(all);
     } finally { setLoadingUsuarios(false); }
   }
 
-  useEffect(() => { smartFetchUsuarios(); }, []);
-  useEffect(() => { smartFetchUsuarios(); }, [fCat, fUF, fTipo]);
+  // Efeito para buscar os usuários apenas uma vez, na montagem do componente.
+  useEffect(() => { fetchAllUsuarios(); }, []);
 
+  // Centraliza toda a lógica de filtragem (dropdowns e busca de texto) em um único useMemo.
+  // Isso evita novas buscas ao banco de dados a cada mudança de filtro, tornando a UI muito mais rápida.
   const usuariosVisiveis = useMemo(() => {
-    const t = norm(qUser);
-    if (!t) return usuarios;
-    return usuarios.filter((u) => {
-      const nome = norm(u.nome || "");
-      const email = norm(u.email || "");
-      const whatsapp = norm(u.whatsappE164 || u.whatsapp || u.telefone || "");
-      const cidade = norm(u.cidade || "");
-      const id = (u.id || "").toLowerCase();
-      return nome.includes(t) || email.includes(t) || whatsapp.includes(t) || cidade.includes(t) || id.includes(t);
-    });
-  }, [usuarios, qUser]);
+    let filteredUsers = [...allUsuarios];
+    const ufFilter = (fUF || "").trim();
+    const catFilter = norm(fCat);
+    const tipoFilter = (fTipo || "").toLowerCase();
+    const textFilter = norm(qUser);
+
+    // 1. Filtros de Dropdown
+    if (catFilter) {
+      filteredUsers = filteredUsers.filter((u) => {
+        const cats: string[] = [];
+        if (Array.isArray(u.categorias)) cats.push(...u.categorias);
+        if (Array.isArray(u.categoriesAll)) cats.push(...u.categoriesAll);
+        if (Array.isArray(u.categoriasAtuacaoPairs)) cats.push(...u.categoriasAtuacaoPairs.map((p) => p?.categoria));
+        if (Array.isArray(u.atuacaoBasica)) cats.push(...u.atuacaoBasica.map((a) => a?.categoria));
+        return cats.some((c) => c && norm(c).includes(catFilter));
+      });
+    }
+    if (ufFilter) {
+      const wantedUF = (ufFilter.length === 2 && UFS.includes(ufFilter as any)) ? ufFilter : ufFilter.toUpperCase();
+      filteredUsers = filteredUsers.filter((u) => {
+        if (wantedUF === "BRASIL" || u.atendeBrasil) return true;
+        const setUF = getUFSetFromUser(u);
+        return setUF.has(wantedUF) || setUF.has("BRASIL");
+      });
+    }
+    if (tipoFilter) {
+      filteredUsers = filteredUsers.filter((u) => {
+        const arr = Array.isArray(u.atuacaoBasica) ? u.atuacaoBasica : [];
+        return arr.some((a) => {
+          if (!a) return false;
+          if (tipoFilter === "venda") return !!a.vendaProdutos?.ativo;
+          if (tipoFilter === "pecas") return !!a.vendaPecas?.ativo;
+          if (tipoFilter === "servicos") return !!a.servicos?.ativo;
+          return false;
+        });
+      });
+    }
+
+    // 2. Filtro de busca por texto
+    if (textFilter) {
+      filteredUsers = filteredUsers.filter((u) => {
+        const nome = norm(u.nome || "");
+        const email = norm(u.email || "");
+        const whatsapp = norm(u.whatsappE164 || u.whatsapp || u.telefone || "");
+        const cidade = norm(u.cidade || "");
+        const id = (u.id || "").toLowerCase();
+        return nome.includes(textFilter) || email.includes(textFilter) || whatsapp.includes(textFilter) || cidade.includes(textFilter) || id.includes(textFilter);
+      });
+    }
+
+    return filteredUsers;
+  }, [allUsuarios, fCat, fUF, fTipo, qUser]);
 
   // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -371,7 +376,7 @@ export default function EditDemandaPage() {
       const batch = writeBatch(db);
       selUsuarios.forEach((uid) => {
         if (jaEnviados.has(uid)) return;
-        const u = usuarios.find((user) => user.id === uid);
+        const u = allUsuarios.find((user) => user.id === uid);
         const isFree = isUserFreeDemand(u);
         const amount = isFree ? 0 : centsBase;
         const paymentStatus: PaymentStatus = isFree ? "paid" : "pending";
@@ -400,7 +405,7 @@ export default function EditDemandaPage() {
       if (unlockCap != null && curUnlocked >= unlockCap) { alert(`Limite de desbloqueios atingido (${unlockCap}).`); return; }
       const existing = assignments.find((x) => x.supplierId === supplierId);
       let billingType: "free" | "paid" = "paid";
-      if (existing?.billingType) { billingType = existing.billingType; } else { const u = usuarios.find((usr) => usr.id === supplierId); billingType = isUserFreeDemand(u || undefined) ? "free" : "paid"; }
+      if (existing?.billingType) { billingType = existing.billingType; } else { const u = allUsuarios.find((usr) => usr.id === supplierId); billingType = isUserFreeDemand(u || undefined) ? "free" : "paid"; }
       await updateDoc(doc(db, "demandAssignments", `${demandaId}_${supplierId}`), { status: "unlocked", unlockedByAdmin: true, unlockedAt: serverTimestamp(), updatedAt: serverTimestamp(), paymentStatus: "paid", billingType });
       await updateDoc(doc(db, "demandas", demandaId), { liberadoPara: arrayUnion(supplierId), liberacoesCount: increment(1), updatedAt: serverTimestamp() });
     } catch { alert("Erro ao liberar contato."); }
@@ -454,7 +459,7 @@ export default function EditDemandaPage() {
     const centsBase = reaisToCents(profileLocalPrice || precoPadraoReais);
     if (!centsBase || centsBase < 100) { alert("Defina um preço válido (Ex.: 19,90)."); return; }
     try {
-      const u = profileCache[uid] || usuarios.find((user) => user.id === uid);
+      const u = profileCache[uid] || allUsuarios.find((user) => user.id === uid);
       const isFree = isUserFreeDemand(u);
       const amount = isFree ? 0 : centsBase;
       const paymentStatus: PaymentStatus = isFree ? "paid" : "pending";
@@ -484,8 +489,9 @@ export default function EditDemandaPage() {
       } catch { }
     }
     if (!updated) { alert("Não foi possível atualizar o plano deste fornecedor."); return; }
-    setUsuarios((prev) => prev.map((u) => (u.id === uid ? { ...u, recebeGratisDemandas: nextVal } : u)));
-    setProfileCache((prev) => prev[uid] ? { ...prev, [uid]: { ...prev[uid], recebeGratisDemandas: nextVal } } : prev);
+    const updatedUserFields = { recebeGratisDemandas: nextVal, freeDemandAccess: nextVal, planoDemandasGratis: nextVal };
+    setAllUsuarios((prev) => prev.map((u) => (u.id === uid ? { ...u, ...updatedUserFields } : u)));
+    setProfileCache((prev) => prev[uid] ? { ...prev, [uid]: { ...prev[uid], ...updatedUserFields } } : prev);
   }
 
   const unlockedCount = useMemo(() => assignments.filter((a) => a.status === "unlocked").length, [assignments]);
@@ -584,11 +590,11 @@ export default function EditDemandaPage() {
                   <div className="rounded-lg border border-dashed p-3"><PDFUploader onUploaded={setPdfUrl} /></div>
                   {pdfUrl ? (
                     <div className="rounded-lg border overflow-hidden" style={{ height: 300 }}>
-                      <DrivePDFViewer fileUrl={`/api/pdf-proxy?file=${encodeURIComponent(pdfUrl || "")}`} height={300} />
-                      <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                      {/* <DrivePDFViewer fileUrl={`/api/pdf-proxy?file=${encodeURIComponent(pdfUrl || "")}`} height={300} /> */}
+                      {/* <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                         <a href={pdfUrl} target="_blank" rel="noreferrer" style={S.ghostBtn}>Abrir em nova aba</a>
                         <button type="button" onClick={() => setPdfUrl(null)} style={S.dangerBtn}>Remover PDF</button>
-                      </div>
+                      </div> */}
                     </div>
                   ) : <p className="text-xs text-slate-500">Envie orçamento, memorial ou ficha técnica (até ~8MB).</p>}
                 </div>
@@ -663,7 +669,7 @@ export default function EditDemandaPage() {
               <div><label style={S.miniLabel}><Filter size={13} /> UF</label><select value={fUF} onChange={(e) => setFUF(e.target.value)} style={{ ...S.input, width: 140 }}><option value="">Todas</option>{UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}</select></div>
               <div><label style={S.miniLabel}><Filter size={13} /> Atuação</label><select value={fTipo} onChange={(e) => setFTipo(e.target.value)} style={{ ...S.input, width: 180 }}><option value="">Todas</option><option value="venda">Venda de produtos</option><option value="pecas">Peças</option><option value="servicos">Serviços</option></select></div>
               <div><label style={S.miniLabel}><Search size={13} /> Buscar</label><div style={{ display: "flex", gap: 6 }}><input value={qUser} onChange={(e) => setQUser(e.target.value)} placeholder="nome, e-mail, whatsapp, cidade ou id" style={{ ...S.input, width: 280 }} />{qUser && <button type="button" onClick={() => setQUser("")} style={S.ghostBtn}>Limpar</button>}</div></div>
-              <button type="button" onClick={() => smartFetchUsuarios()} style={S.ghostBtn}><RefreshCw size={16} /> Atualizar</button>
+              <button type="button" onClick={() => fetchAllUsuarios()} style={S.ghostBtn} title="Recarregar lista de usuários do banco de dados"><RefreshCw size={16} /> Atualizar</button>
             </div>
           </div>
 
