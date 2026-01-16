@@ -338,67 +338,83 @@ export default function ImageUploader({
       </div>
 
       {/* ... grid de imagens ... */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 h-[calc(30rem+30px)] overflow-y-auto">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
         {listaImagens.map((url, i) => (
           <div
-            key={url} // A URL é garantidamente única aqui, sendo uma chave melhor e mais limpa.
-            className="relative group rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm z-0 h-10"
+            key={url}
+            // MUDANÇA 1: Flex Column para ter imagem em cima e botões embaixo
+            className="flex flex-col rounded-xl overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-shadow"
           >
-            {/* A Imagem */}
-            <img
-              src={url}
-              alt={`Imagem ${i + 1}`}
-              className={[
-                "w-full  h28 object-cover", // 7rem é o valor de h-28, que era a altura anterior
-                circular ? "rounded-full" : "",
-              ].join(" ")}
-            />
+            {/* MUDANÇA 2: Container da Imagem */}
+            {/* h-48 define a altura da área da imagem. Pode aumentar ou diminuir conforme necessidade. */}
+            <div className="relative w-full h-48 bg-slate-100 flex items-center justify-center overflow-hidden group">
+              <img
+                src={url}
+                alt={`Imagem ${i + 1}`}
+                // object-contain: mostra a imagem inteira (com bordas brancas se preciso)
+                // object-cover: preenche tudo (pode cortar as bordas)
+                className={`max-w-full max-h-full ${circular ? "rounded-full" : "object-contain"}`}
+              />
 
-            {/* Container dos Botões - Alterado para Z-Index alto e posição fixa */}
-            <div className="absolute top-2 right-2 z-10 flex gap-1">
+              {/* Opcional: Link para ver a imagem grande ao clicar */}
+              <a
+                href={url}
+                target="_blank"
+                rel="noreferrer"
+                className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors"
+              />
+            </div>
 
-              {/* Botões de Mover (Setinhas) */}
-              {enableReorder && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => mover(i, -1)}
-                    className="bg-white/90 hover:bg-white text-slate-700 rounded-full p-1.5 shadow-md"
-                    title={L.moveLeft}
-                  >
-                    ◀
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => mover(i, 1)}
-                    className="bg-white/90 hover:bg-white text-slate-700 rounded-full p-1.5 shadow-md"
-                    title={L.moveRight}
-                  >
-                    ▶
-                  </button>
-                </>
-              )}
+            {/* MUDANÇA 3: Barra de Ações (Embaixo da imagem) */}
+            <div className="flex items-center justify-between p-2 bg-slate-50 border-t border-slate-100">
 
-              {/* Botão de Remover (Vermelho) */}
+              {/* Botões de Mover (Esquerda) */}
+              <div className="flex gap-1">
+                {enableReorder && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => mover(i, -1)}
+                      disabled={i === 0}
+                      className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded disabled:opacity-30"
+                      title={L.moveLeft}
+                    >
+                      ◀
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => mover(i, 1)}
+                      disabled={i === listaImagens.length - 1}
+                      className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded disabled:opacity-30"
+                      title={L.moveRight}
+                    >
+                      ▶
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Botão Remover (Direita - O "X") */}
               <button
                 type="button"
                 onClick={() => remover(i)}
-                className="bg-red-600 text-white rounded-full p-2 shadow-lg hover:bg-red-700 transition-transform hover:scale-105"
+                className="flex items-center justify-center w-8 h-8 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                 title={L.remove}
               >
+                <span className="sr-only">Remover</span>
+                {/* Ícone de Lixeira ou X mais limpo */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="18"
-                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="3"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  className="w-5 h-5"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                  <path d="M18 6 6 18" />
+                  <path d="M6 6 18 18" />
                 </svg>
               </button>
             </div>
