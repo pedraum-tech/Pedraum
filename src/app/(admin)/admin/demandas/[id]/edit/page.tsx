@@ -34,6 +34,32 @@ import { ProfileModal } from "./components/ProfileModal";
 const PDFUploader = nextDynamic(() => import("@/features/documents/PDFUploader"), { ssr: false }) as any;
 const DrivePDFViewer = nextDynamic(() => import("@/features/documents/DrivePDFViewer"), { ssr: false }) as any;
 
+// ============================================================================
+// 👇 AQUI ESTAVA FALTANDO: FUNÇÕES DE FILTRO INTELIGENTE (ADICIONADO AGORA) 👇
+// ============================================================================
+
+const STOP_WORDS_PT = new Set([
+  "de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "com", "nao", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "ao", "ele", "das", "tem", "seu", "sua", "ou", "ser", "quando", "muito", "nos", "ja", "eu", "tambem", "so", "pelo", "pela", "ate", "isso", "ela", "entre", "depois", "sem", "mesmo", "aos", "ter", "seus", "quem", "nas", "me", "esse", "eles", "voce", "essa", "num", "nem", "suas", "meu", "minha", "numa", "pelos", "elas", "qual", "nos", "lhe", "deles", "essas", "esses", "pelas", "este", "dele", "tu", "te", "voces", "vos", "lhes", "meus", "minhas", "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", "estamos", "estao", "sou", "somos", "sao", "era", "eram", "fui", "foi", "fomos", "foram", "tinha", "tinham", "tive", "teve"
+]);
+
+function extractKeywordsClient(text: string): string[] {
+  if (!text) return [];
+  // 1. Remove acentos, pontuação e joga para minúsculo
+  const normalized = text
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
+    .replace(/\s{2,}/g, " ");
+
+  // 2. Quebra em palavras e filtra
+  return normalized.split(" ").filter(word => {
+    // Remove números puros, palavras curtas (<3 letras) e stop words
+    return word.length > 2 && isNaN(Number(word)) && !STOP_WORDS_PT.has(word);
+  });
+}
+
+// ============================================================================
+
 export default function EditDemandaPage() {
   const router = useRouter();
   const params = useParams();
@@ -91,6 +117,9 @@ export default function EditDemandaPage() {
   const [fUF, setFUF] = useState("");
   const [qUser, setQUser] = useState("");
   const [fTipo, setFTipo] = useState("");
+
+  // NOVO: Estado para ativar/desativar o filtro inteligente
+  const [filtroDescricaoAtivo, setFiltroDescricaoAtivo] = useState(false);
 
   const subsForm = useMemo(
     () => categorias.find((c) => c.nome === form.categoria)?.subcategorias ?? [],
@@ -219,10 +248,42 @@ export default function EditDemandaPage() {
   // Isso evita novas buscas ao banco de dados a cada mudança de filtro, tornando a UI muito mais rápida.
   const usuariosVisiveis = useMemo(() => {
     let filteredUsers = [...allUsuarios];
+
+    // Filtros Básicos
     const ufFilter = (fUF || "").trim();
     const catFilter = norm(fCat);
     const tipoFilter = (fTipo || "").toLowerCase();
     const textFilter = norm(qUser);
+
+    // --- NOVO: FILTRO INTELIGENTE POR DESCRIÇÃO (Lógica do Node.js portada) ---
+    if (filtroDescricaoAtivo && form.descricao) {
+      // 1. Extrai keywords da descrição atual do formulário
+      const keywords = extractKeywordsClient(form.descricao);
+
+      if (keywords.length > 0) {
+        filteredUsers = filteredUsers.filter((u) => {
+          // Se o usuário não tem atuação básica, sai fora
+          if (!Array.isArray(u.atuacaoBasica)) return false;
+
+          // Verifica se ALGUM item de atuação básica tem match
+          return u.atuacaoBasica.some((atuacao: any) => {
+            // Checa se Venda Produtos está ativo
+            if (atuacao.vendaProdutos && atuacao.vendaProdutos.ativo) {
+              const obsTexto = atuacao.vendaProdutos.obs || "";
+              const obsNormalizada = norm(obsTexto); // Usa sua função norm() existente
+
+              // Verifica se alguma keyword da demanda está no obs do usuário
+              return keywords.some(kw => obsNormalizada.includes(kw));
+            }
+            return false;
+          });
+        });
+      }
+    }
+    // --------------------------------------------------------------------------
+
+    // ... (Mantenha o resto dos filtros existentes abaixo: Categoria, UF, Tipo, Texto) ...
+    // Importante: A ordem importa. Se colocar o filtro inteligente antes, ele já reduz a lista.
 
     // 1. Filtros de Dropdown
     if (catFilter) {
@@ -269,7 +330,7 @@ export default function EditDemandaPage() {
     }
 
     return filteredUsers;
-  }, [allUsuarios, fCat, fUF, fTipo, qUser]);
+  }, [allUsuarios, fCat, fUF, fTipo, qUser, filtroDescricaoAtivo, form.descricao]);
 
   // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -669,6 +730,22 @@ export default function EditDemandaPage() {
               <div><label style={S.miniLabel}><Filter size={13} /> UF</label><select value={fUF} onChange={(e) => setFUF(e.target.value)} style={{ ...S.input, width: 140 }}><option value="">Todas</option>{UFS.map((uf) => <option key={uf} value={uf}>{uf}</option>)}</select></div>
               <div><label style={S.miniLabel}><Filter size={13} /> Atuação</label><select value={fTipo} onChange={(e) => setFTipo(e.target.value)} style={{ ...S.input, width: 180 }}><option value="">Todas</option><option value="venda">Venda de produtos</option><option value="pecas">Peças</option><option value="servicos">Serviços</option></select></div>
               <div><label style={S.miniLabel}><Search size={13} /> Buscar</label><div style={{ display: "flex", gap: 6 }}><input value={qUser} onChange={(e) => setQUser(e.target.value)} placeholder="nome, e-mail, whatsapp, cidade ou id" style={{ ...S.input, width: 280 }} />{qUser && <button type="button" onClick={() => setQUser("")} style={S.ghostBtn}>Limpar</button>}</div></div>
+              {/* NOVO BOTÃO DE FILTRO INTELIGENTE */}
+              <div
+                onClick={() => setFiltroDescricaoAtivo(!filtroDescricaoAtivo)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 6, cursor: "pointer",
+                  background: filtroDescricaoAtivo ? "#e0f2fe" : "#f1f5f9",
+                  border: `1px solid ${filtroDescricaoAtivo ? "#0ea5e9" : "#cbd5e1"}`,
+                  padding: "0 10px", borderRadius: 6, height: 42,
+                  color: filtroDescricaoAtivo ? "#0284c7" : "#64748b",
+                  fontWeight: 600, fontSize: 13, userSelect: "none"
+                }}
+                title="Filtra usuários que tenham palavras-chave da descrição em seus produtos."
+              >
+                {filtroDescricaoAtivo ? <CheckCircle2 size={16} /> : <Filter size={16} />}
+                Match Descrição
+              </div>
               <button type="button" onClick={() => fetchAllUsuarios()} style={S.ghostBtn} title="Recarregar lista de usuários do banco de dados"><RefreshCw size={16} /> Atualizar</button>
             </div>
           </div>
@@ -722,20 +799,6 @@ export default function EditDemandaPage() {
             <div style={{ flex: 1 }} />
             <button type="button" onClick={enviarParaSelecionados} disabled={envLoading || selUsuarios.length === 0} style={S.primaryBtn}><Send size={18} /> {envLoading ? "Enviando..." : `Enviar (${selUsuarios.length})`}</button>
           </div>
-        </div>
-
-        <div style={S.card}>
-          <h2 style={S.cardTitle}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Users size={20} color="#2563eb" /> Envios realizados</span></h2>
-          {assignments.length === 0 ? (<div style={S.emptyBox}>Nenhum envio ainda.</div>) : (
-            <div style={{ display: "grid", gap: 12 }}>
-              <div style={S.tableHeader}>
-                <div style={{ flex: 1.7 }}>Fornecedor</div><div style={{ flex: 1 }}>Status</div><div style={{ flex: 0.8 }}>Pagamento</div><div style={{ flex: 0.6, textAlign: "right" }}>Preço</div><div style={{ flex: 0.6, textAlign: "right" }}>Cap</div><div style={{ flex: 1.6, textAlign: "right" }}>Ações</div>
-              </div>
-              {assignments.slice().sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)).map((a) => (
-                <AssignmentRow key={a.id} a={a} onPago={() => setPaymentStatus(a.supplierId, "paid")} onPendente={() => setPaymentStatus(a.supplierId, "pending")} onLiberar={() => unlockAssignment(a.supplierId)} onCancelar={() => cancelAssignment(a.supplierId)} onExcluir={() => deleteAssignment(a.supplierId)} onReativar={() => reactivateAssignment(a.supplierId)} />
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

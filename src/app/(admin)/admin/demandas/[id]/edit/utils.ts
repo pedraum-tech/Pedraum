@@ -192,3 +192,25 @@ export function docToUsuario(d: any): Usuario {
     };
     return out;
 }
+
+// --- 1. CONFIGURAÇÃO DO FILTRO INTELIGENTE (COPIAR ISSO) ---
+
+const STOP_WORDS_PT = new Set([
+    "de", "a", "o", "que", "e", "do", "da", "em", "um", "para", "com", "nao", "uma", "os", "no", "se", "na", "por", "mais", "as", "dos", "como", "mas", "ao", "ele", "das", "tem", "seu", "sua", "ou", "ser", "quando", "muito", "nos", "ja", "eu", "tambem", "so", "pelo", "pela", "ate", "isso", "ela", "entre", "depois", "sem", "mesmo", "aos", "ter", "seus", "quem", "nas", "me", "esse", "eles", "voce", "essa", "num", "nem", "suas", "meu", "minha", "numa", "pelos", "elas", "qual", "nos", "lhe", "deles", "essas", "esses", "pelas", "este", "dele", "tu", "te", "voces", "vos", "lhes", "meus", "minhas", "teu", "tua", "teus", "tuas", "nosso", "nossa", "nossos", "nossas", "dela", "delas", "esta", "estes", "estas", "aquele", "aquela", "aqueles", "aquelas", "isto", "aquilo", "estou", "estamos", "estao", "sou", "somos", "sao", "era", "eram", "fui", "foi", "fomos", "foram", "tinha", "tinham", "tive", "teve"
+]);
+
+function extractKeywordsClient(text: string): string[] {
+    if (!text) return [];
+    // 1. Remove acentos, pontuação e joga para minúsculo
+    const normalized = text
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, "")
+        .replace(/\s{2,}/g, " ");
+
+    // 2. Quebra em palavras e filtra
+    return normalized.split(" ").filter(word => {
+        // Remove números puros, palavras curtas (<3 letras) e stop words
+        return word.length > 2 && isNaN(Number(word)) && !STOP_WORDS_PT.has(word);
+    });
+}
