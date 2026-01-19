@@ -401,7 +401,7 @@ export default function ImageUploader({
                 className="flex items-center justify-center w-8 h-8 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
                 title={L.remove}
               >
-                <span className="sr-only">Remover</span>
+                {/* <span className="sr-only">Remover</span> */}
                 {/* Ícone de Lixeira ou X mais limpo */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
