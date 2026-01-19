@@ -26,6 +26,45 @@ test.describe('Página de Edição de Demanda', () => {
         await expect(page.locator('text=Carregando demanda...')).toBeHidden({ timeout: 100000 });
     });
 
+    // --- NOVO TESTE PARA O FILTRO INTELIGENTE ---
+    test('Deve filtrar usuários usando o Match Descrição', async ({ page }) => {
+        const btnMatch = page.locator('div[title="Filtra usuários que tenham palavras-chave da descrição em seus produtos."]');
+        const inputDescricao = page.locator('textarea[name="descricao"]');
+
+        // 1. Verificar estado inicial (Botão cinza/desativado)
+        // rgb(241, 245, 249) é o equivalente a #f1f5f9 (slate-100)
+        await expect(btnMatch).toHaveCSS('background-color', 'rgb(241, 245, 249)');
+
+        // 2. Preencher a descrição com uma palavra-chave que NÃO deve existir (Teste Negativo)
+        // Isso garante que o filtro realmente funciona ao esconder todo mundo
+        await inputDescricao.fill('PalavraChaveMuitoDoidaQueNinguemTemXYZ');
+
+        // Clica para ativar o filtro
+        await btnMatch.click();
+
+        // 3. Verificar se o botão ficou ativo (Azul)
+        // rgb(224, 242, 254) é o equivalente a #e0f2fe (sky-100)
+        await expect(btnMatch).toHaveCSS('background-color', 'rgb(224, 242, 254)');
+
+        // Como a palavra é bizarra, deve aparecer a mensagem de "Nenhum usuário encontrado"
+        await expect(page.locator('text=Nenhum usuário encontrado')).toBeVisible();
+
+        // 4. Preencher com uma palavra que SABEMOS que existe (Teste Positivo)
+        // *Importante*: Tenha certeza que no seu banco de teste existe alguém com "bateria" ou mude a palavra abaixo
+        await inputDescricao.fill('Preciso de uma Bateria urgente');
+
+        // Agora a lista deve conter usuários (a mensagem de erro deve sumir)
+        // await expect(page.locator('text=Nenhum usuário encontrado')).toBeHidden();
+
+        // Opcional: Verificar se a lista tem pelo menos 1 item
+        const count = await page.locator('input[type="checkbox"]').count();
+        expect(count).toBeGreaterThan(0);
+
+        // 5. Desativar o filtro e verificar se volta ao normal
+        await btnMatch.click();
+        await expect(btnMatch).toHaveCSS('background-color', 'rgb(241, 245, 249)');
+    });
+
     // test('Deve abrir a tela de demandas de admin', async ({ page }) => {
     //     // Verifica se estamos na página correta
     //     await expect(page).toHaveURL(new RegExp(`${url_test}/admin/demandas/`));
