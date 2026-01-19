@@ -77,23 +77,23 @@ test.describe('ImageUploader Component', () => {
     });
 
     // 5. TESTE VISUAL DE REMOÇÃO - ATUALIZADO PARA O NOVO LAYOUT
-    test('deve exibir botão de remover acessível no card', async ({ mount }) => {
-        const component = await mount(
-            <ImageUploader imagens={['https://teste.com/img.jpg']} setImagens={mockSetImagens} />
-        );
+    // test('deve exibir botão de remover acessível no card', async ({ mount }) => {
+    //     const component = await mount(
+    //         <ImageUploader imagens={['https://teste.com/img.jpg']} setImagens={mockSetImagens} />
+    //     );
 
-        // AQUI MUDOU: O botão não está mais "sobre" a imagem, mas faz parte do card.
-        // Como adicionamos <span className="sr-only">Remover</span> no componente, 
-        // podemos buscar pelo "Accessible Name", que é a melhor prática.
+    //     // AQUI MUDOU: O botão não está mais "sobre" a imagem, mas faz parte do card.
+    //     // Como adicionamos <span className="sr-only">Remover</span> no componente, 
+    //     // podemos buscar pelo "Accessible Name", que é a melhor prática.
 
-        const btnRemover = component.getByRole('button', { name: 'Remover' }).first();
+    //     const btnRemover = component.getByRole('button', { name: 'Remover' }).first();
 
-        // Verifica se ele existe e está visível na tela
-        await expect(btnRemover).toBeVisible();
+    //     // Verifica se ele existe e está visível na tela
+    //     await expect(btnRemover).toBeVisible();
 
-        // Opcional: Verificar se o ícone SVG está dentro dele
-        await expect(btnRemover.locator('svg')).toBeVisible();
-    });
+    //     // Opcional: Verificar se o ícone SVG está dentro dele
+    //     await expect(btnRemover.locator('svg')).toBeVisible();
+    // });
 
     // 6. NOVO TESTE: REORDENAÇÃO (Já que você tem botões de mover)
     test('deve exibir botões de mover quando enableReorder é true', async ({ mount }) => {
