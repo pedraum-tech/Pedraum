@@ -119,7 +119,7 @@ export default function EditDemandaPage() {
   const [fTipo, setFTipo] = useState("");
 
   // NOVO: Estado para ativar/desativar o filtro inteligente
-  const [filtroDescricaoAtivo, setFiltroDescricaoAtivo] = useState(false);
+  // const [filtroDescricaoAtivo, setFiltroDescricaoAtivo] = useState(false);
 
   const subsForm = useMemo(
     () => categorias.find((c) => c.nome === form.categoria)?.subcategorias ?? [],
@@ -256,30 +256,30 @@ export default function EditDemandaPage() {
     const textFilter = norm(qUser);
 
     // --- NOVO: FILTRO INTELIGENTE POR DESCRIÇÃO (Lógica do Node.js portada) ---
-    if (filtroDescricaoAtivo && form.descricao) {
-      // 1. Extrai keywords da descrição atual do formulário
-      const keywords = extractKeywordsClient(form.descricao);
+    // if (filtroDescricaoAtivo && form.descricao) {
+    //   // 1. Extrai keywords da descrição atual do formulário
+    //   const keywords = extractKeywordsClient(form.descricao);
 
-      if (keywords.length > 0) {
-        filteredUsers = filteredUsers.filter((u) => {
-          // Se o usuário não tem atuação básica, sai fora
-          if (!Array.isArray(u.atuacaoBasica)) return false;
+    //   if (keywords.length > 0) {
+    //     filteredUsers = filteredUsers.filter((u) => {
+    //       // Se o usuário não tem atuação básica, sai fora
+    //       if (!Array.isArray(u.atuacaoBasica)) return false;
 
-          // Verifica se ALGUM item de atuação básica tem match
-          return u.atuacaoBasica.some((atuacao: any) => {
-            // Checa se Venda Produtos está ativo
-            if (atuacao.vendaProdutos && atuacao.vendaProdutos.ativo) {
-              const obsTexto = atuacao.vendaProdutos.obs || "";
-              const obsNormalizada = norm(obsTexto); // Usa sua função norm() existente
+    //       // Verifica se ALGUM item de atuação básica tem match
+    //       return u.atuacaoBasica.some((atuacao: any) => {
+    //         // Checa se Venda Produtos está ativo
+    //         if (atuacao.vendaProdutos && atuacao.vendaProdutos.ativo) {
+    //           const obsTexto = atuacao.vendaProdutos.obs || "";
+    //           const obsNormalizada = norm(obsTexto); // Usa sua função norm() existente
 
-              // Verifica se alguma keyword da demanda está no obs do usuário
-              return keywords.some(kw => obsNormalizada.includes(kw));
-            }
-            return false;
-          });
-        });
-      }
-    }
+    //           // Verifica se alguma keyword da demanda está no obs do usuário
+    //           return keywords.some(kw => obsNormalizada.includes(kw));
+    //         }
+    //         return false;
+    //       });
+    //     });
+    //   }
+    // }
     // --------------------------------------------------------------------------
 
     // ... (Mantenha o resto dos filtros existentes abaixo: Categoria, UF, Tipo, Texto) ...
@@ -330,7 +330,7 @@ export default function EditDemandaPage() {
     }
 
     return filteredUsers;
-  }, [allUsuarios, fCat, fUF, fTipo, qUser, filtroDescricaoAtivo, form.descricao]);
+  }, [allUsuarios, fCat, fUF, fTipo, qUser,/* filtroDescricaoAtivo,*/ form.descricao]);
 
   // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -731,7 +731,7 @@ export default function EditDemandaPage() {
               <div><label style={S.miniLabel}><Filter size={13} /> Atuação</label><select value={fTipo} onChange={(e) => setFTipo(e.target.value)} style={{ ...S.input, width: 180 }}><option value="">Todas</option><option value="venda">Venda de produtos</option><option value="pecas">Peças</option><option value="servicos">Serviços</option></select></div>
               <div><label style={S.miniLabel}><Search size={13} /> Buscar</label><div style={{ display: "flex", gap: 6 }}><input value={qUser} onChange={(e) => setQUser(e.target.value)} placeholder="nome, e-mail, whatsapp, cidade ou id" style={{ ...S.input, width: 280 }} />{qUser && <button type="button" onClick={() => setQUser("")} style={S.ghostBtn}>Limpar</button>}</div></div>
               {/* NOVO BOTÃO DE FILTRO INTELIGENTE */}
-              <div
+              {/* <div
                 onClick={() => setFiltroDescricaoAtivo(!filtroDescricaoAtivo)}
                 style={{
                   display: "flex", alignItems: "center", gap: 6, cursor: "pointer",
@@ -745,7 +745,7 @@ export default function EditDemandaPage() {
               >
                 {filtroDescricaoAtivo ? <CheckCircle2 size={16} /> : <Filter size={16} />}
                 Match Descrição
-              </div>
+              </div> */}
               <button type="button" onClick={() => fetchAllUsuarios()} style={S.ghostBtn} title="Recarregar lista de usuários do banco de dados"><RefreshCw size={16} /> Atualizar</button>
             </div>
           </div>
