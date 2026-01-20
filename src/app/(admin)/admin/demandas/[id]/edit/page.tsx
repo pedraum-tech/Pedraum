@@ -330,7 +330,7 @@ export default function EditDemandaPage() {
     }
 
     return filteredUsers;
-  }, [allUsuarios, fCat, fUF, fTipo, qUser,/* filtroDescricaoAtivo,*/ form.descricao]);
+  }, [allUsuarios, fCat, fUF, fTipo, qUser/*, filtroDescricaoAtivo*/, form.descricao]);
 
   // Handlers
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -800,6 +800,20 @@ export default function EditDemandaPage() {
             <button type="button" onClick={enviarParaSelecionados} disabled={envLoading || selUsuarios.length === 0} style={S.primaryBtn}><Send size={18} /> {envLoading ? "Enviando..." : `Enviar (${selUsuarios.length})`}</button>
           </div>
         </div>
+      </div>
+
+      <div style={S.card}>
+        <h2 style={S.cardTitle}><span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}><Users size={20} color="#2563eb" /> Envios realizados</span></h2>
+        {assignments.length === 0 ? (<div style={S.emptyBox}>Nenhum envio ainda.</div>) : (
+          <div style={{ display: "grid", gap: 12 }}>
+            <div style={S.tableHeader}>
+              <div style={{ flex: 1.7 }}>Fornecedor</div><div style={{ flex: 1 }}>Status</div><div style={{ flex: 0.8 }}>Pagamento</div><div style={{ flex: 0.6, textAlign: "right" }}>Preço</div><div style={{ flex: 0.6, textAlign: "right" }}>Cap</div><div style={{ flex: 1.6, textAlign: "right" }}>Ações</div>
+            </div>
+            {assignments.slice().sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0)).map((a) => (
+              <AssignmentRow key={a.id} a={a} onPago={() => setPaymentStatus(a.supplierId, "paid")} onPendente={() => setPaymentStatus(a.supplierId, "pending")} onLiberar={() => unlockAssignment(a.supplierId)} onCancelar={() => cancelAssignment(a.supplierId)} onExcluir={() => deleteAssignment(a.supplierId)} onReativar={() => reactivateAssignment(a.supplierId)} />
+            ))}
+          </div>
+        )}
       </div>
 
       {openProfileUserId && (
