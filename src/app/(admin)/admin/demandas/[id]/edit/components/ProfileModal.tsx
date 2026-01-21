@@ -103,7 +103,7 @@ export function ProfileModal({
 
     return (
         <div style={S.modalBackdrop}>
-            <div style={S.modalCard}>
+            <div style={{ ...S.modalCard, maxHeight: "90vh", overflowY: "auto" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                     <h3 style={{ fontSize: 18, fontWeight: 900, color: "#0f172a" }}>Perfil do fornecedor</h3>
                     <button onClick={onClose} style={S.ghostBtn}>Fechar</button>
