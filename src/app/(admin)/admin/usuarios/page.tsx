@@ -1412,7 +1412,7 @@ function UsuariosAdminPage() {
                       >
                         <option value="usuario">Usuário</option>
                         <option value="patrocinador">Patrocinador</option>
-                        <option value="admin">Admin</option>
+                        {/* <option value="admin">Admin</option> */}
                       </select>
                     </div>
 
