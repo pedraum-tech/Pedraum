@@ -9,7 +9,13 @@ import { Inter } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import WhatsappFloatButton from "@/components/ui/WhatsappFloatButton";
-import OnboardingTour from "@/features/onboarding/OnboardingTour";
+import MaintenanceScreen from "@/components/layout/MaintenanceScreen";
+
+// =========================
+// CHAVE GLOBAL DE MANUTENÇÃO
+// =========================
+// Mude para 'false' quando o problema for resolvido e o site volta ao normal na hora!
+const IS_MAINTENANCE_MODE = true;
 
 // =========================
 // Fonte global
@@ -24,41 +30,26 @@ const inter = Inter({
 // =========================
 export const metadata: Metadata = {
   title: "Pedraum Brasil — Plataforma de Demandas de Mineração",
-  description:
-    "A maior plataforma de demandas de mineração e britagem do Brasil. Publique, encontre e negocie soluções reais.",
+  description: "A maior plataforma de demandas de mineração e britagem do Brasil. Publique, encontre e negocie soluções reais.",
   metadataBase: new URL("https://pedraum.com.br"),
-  icons: {
-    icon: "/favicon.ico",
-  },
+  icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "Pedraum Brasil",
-    description:
-      "A plataforma nº 1 para demandas reais de mineração e britagem.",
+    description: "A plataforma nº 1 para demandas reais de mineração e britagem.",
     url: "https://pedraum.com.br",
     siteName: "Pedraum Brasil",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Pedraum Brasil",
-      },
-    ],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Pedraum Brasil" }],
     locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Pedraum Brasil",
-    description:
-      "Publique e encontre demandas reais de mineração e britagem.",
+    description: "Publique e encontre demandas reais de mineração e britagem.",
     images: ["/og-image.png"],
   },
 };
 
-// =========================
-// Viewport — trava zoom mobile (Next.js)
-// =========================
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -66,62 +57,31 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-// =========================
-// Layout Global
-// =========================
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode; }) {
   return (
-    <html
-      lang="pt-BR"
-      suppressHydrationWarning
-      // Extra: ajuda a reduzir gestos de zoom/double-tap em alguns browsers
-      style={{
-        touchAction: "manipulation",
-        // evita alguns comportamentos de zoom/scroll estranho em mobile
-        overscrollBehaviorY: "none",
-      }}
-    >
+    <html lang="pt-BR" suppressHydrationWarning style={{ touchAction: "manipulation", overscrollBehaviorY: "none" }}>
       <head>
-        {/* META extra para garantir bloqueio de zoom em mais navegadores */}
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-        />
-
-        {/* (Opcional) melhora comportamento em alguns devices antigos */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="HandheldFriendly" content="true" />
         <meta name="MobileOptimized" content="320" />
       </head>
 
-      <body
-        className={`${inter.className} bg-[#F6F9FA] text-[#023047] antialiased`}
-      >
-        {/* ===============================
-            HEADER — fixo, limpo e moderno
-        ================================= */}
-        <Header />
+      <body className={`${inter.className} bg-[#F6F9FA] text-[#023047] antialiased`}>
 
-        {/* ===============================
-            CONTEÚDO PRINCIPAL
-        ================================= */}
-        <main className="min-h-screen w-full mx-auto">
-          {children}
-        </main>
+        {/* A MÁGICA ACONTECE AQUI */}
+        {IS_MAINTENANCE_MODE ? (
+          <MaintenanceScreen />
+        ) : (
+          <>
+            <Header />
+            <main className="min-h-screen w-full mx-auto">
+              {children}
+            </main>
+            <WhatsappFloatButton />
+            <Footer />
+          </>
+        )}
 
-        {/* WhatsApp flutuante */}
-        <WhatsappFloatButton />
-
-        {/* ===============================
-            FOOTER — institucional
-        ================================= */}
-        <Footer />
-
-        {/* Onboarding — carregado sempre no final */}
-        {/* <OnboardingTour /> */}
       </body>
     </html>
   );
